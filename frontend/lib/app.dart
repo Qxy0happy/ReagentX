@@ -539,7 +539,7 @@ class _ProfilePageState extends State<_ProfilePage> {
             if (_loginMode == 'register') ...[
               TextField(
                 controller: _newTeacherCtrl,
-                decoration: const InputDecoration(labelText: '指导教师 *', border: OutlineInputBorder()),
+                decoration: const InputDecoration(labelText: '课题负责人 *', border: OutlineInputBorder()),
               ),
               const SizedBox(height: 12),
               TextField(
@@ -578,8 +578,8 @@ class _ProfilePageState extends State<_ProfilePage> {
               TextField(
                 controller: _groupCtrl,
                 decoration: const InputDecoration(
-                  labelText: '指导教师或课题组',
-                  hintText: '支持搜索',
+                  labelText: '课题负责人',
+                  hintText: '输入负责人姓名搜索课题组',
                   border: OutlineInputBorder(),
                 ),
                 onChanged: (q) {
@@ -675,7 +675,7 @@ class _ProfilePageState extends State<_ProfilePage> {
                 ),
                 if (auth.teacher != null && auth.teacher!.isNotEmpty) ...[
                   const SizedBox(height: 2),
-                  Text('指导教师: ${auth.teacher}', style: Theme.of(context).textTheme.bodySmall),
+                  Text('课题负责人: ${auth.teacher}', style: Theme.of(context).textTheme.bodySmall),
                 ],
                 if (auth.labLocation != null && auth.labLocation!.isNotEmpty) ...[
                   const SizedBox(height: 2),
