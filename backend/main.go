@@ -172,5 +172,13 @@ func runMigrations(db *sql.DB) error {
 	INSERT INTO items_fts(items_fts) VALUES('rebuild');
 	`
 	_, err := db.Exec(schema)
-	return err
+	if err != nil {
+		return err
+	}
+
+	// 兼容迁移：旧数据库没有 reply_text/replied_at 列
+	db.Exec("ALTER TABLE inquiries ADD COLUMN reply_text TEXT NOT NULL DEFAULT ''")
+	db.Exec("ALTER TABLE inquiries ADD COLUMN replied_at TEXT NOT NULL DEFAULT ''")
+
+	return nil
 }
