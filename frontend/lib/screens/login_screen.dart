@@ -16,6 +16,7 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  int _loginMode = 0;
   final _teacherCtrl = TextEditingController();
   final _passwordCtrl = TextEditingController();
   final _passwordFocus = FocusNode();
@@ -181,95 +182,175 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text('ReagentX', style: Theme.of(context).textTheme.headlineMedium),
-            const SizedBox(height: 8),
-            Text('试剂闲鱼', style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Colors.grey)),
-            const SizedBox(height: 48),
-
-            // 指导教师（带自动提示）
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                TextFormField(
-                  controller: _teacherCtrl,
-                  decoration: const InputDecoration(
-                    labelText: '指导教师姓名',
-                    hintText: '如：张伟',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.school),
+                // ---- 学校品牌 ----
+                Container(
+                  width: 64, height: 64,
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primary,
+                    borderRadius: BorderRadius.circular(16),
                   ),
-                  onTapOutside: (_) => setState(() => _showSuggestions = false),
-                ),
-                ..._buildSuggestions(),
-              ],
-            ),
-            const SizedBox(height: 12),
-
-            // 密码
-            TextFormField(
-              focusNode: _passwordFocus,
-              controller: _passwordCtrl,
-              obscureText: _obscurePassword,
-              decoration: InputDecoration(
-                labelText: '你的登录密码',
-                hintText: '请输入密码',
-                border: const OutlineInputBorder(),
-                prefixIcon: const Icon(Icons.lock_outline),
-                suffixIcon: IconButton(
-                  icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
-                  onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
-                ),
-              ),
-            ),
-            const SizedBox(height: 12),
-
-            // 成员姓名（带课题组成员建议）
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                TextFormField(
-                  controller: _userCtrl,
-                  focusNode: _userFocus,
-                  onTapOutside: (_) => setState(() => _showUserSuggestions = false),
-                  decoration: const InputDecoration(
-                    labelText: '成员姓名',
-                    hintText: '如：李华',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.person),
+                  child: const Center(
+                    child: Text('HFUT', style: TextStyle(
+                      color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18,
+                    )),
                   ),
                 ),
-                ..._buildUserSuggestions(),
+                const SizedBox(height: 8),
+                Text('合肥工业大学', style: Theme.of(context).textTheme.titleMedium),
+                const SizedBox(height: 4),
+                Text('ReagentX · 试剂管理平台', style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey)),
+                const SizedBox(height: 24),
+
+                // ---- 登录方式切换 ----
+                SegmentedButton<int>(
+                  segments: const [
+                    ButtonSegment(value: 0, label: Text('课题组'), icon: Icon(Icons.group, size: 18)),
+                    ButtonSegment(value: 1, label: Text('校园网'), icon: Icon(Icons.school, size: 18)),
+                  ],
+                  selected: {_loginMode},
+                  onSelectionChanged: (v) => setState(() => _loginMode = v.first),
+                ),
+                const SizedBox(height: 24),
+
+                if (_loginMode == 0) ...[
+                  // ---- 课题组登录 ----
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      TextFormField(
+                        controller: _teacherCtrl,
+                        decoration: const InputDecoration(
+                          labelText: '指导教师姓名',
+                          hintText: '如：张伟',
+                          border: OutlineInputBorder(),
+                          prefixIcon: Icon(Icons.school),
+                        ),
+                        onTapOutside: (_) => setState(() => _showSuggestions = false),
+                      ),
+                      ..._buildSuggestions(),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    focusNode: _passwordFocus,
+                    controller: _passwordCtrl,
+                    obscureText: _obscurePassword,
+                    decoration: InputDecoration(
+                      labelText: '你的登录密码',
+                      hintText: '请输入密码',
+                      border: const OutlineInputBorder(),
+                      prefixIcon: const Icon(Icons.lock_outline),
+                      suffixIcon: IconButton(
+                        icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
+                        onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      TextFormField(
+                        controller: _userCtrl,
+                        focusNode: _userFocus,
+                        onTapOutside: (_) => setState(() => _showUserSuggestions = false),
+                        decoration: const InputDecoration(
+                          labelText: '成员姓名',
+                          hintText: '如：李华',
+                          border: OutlineInputBorder(),
+                          prefixIcon: Icon(Icons.person),
+                        ),
+                      ),
+                      ..._buildUserSuggestions(),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  FilledButton(
+                    onPressed: _loading ? null : _login,
+                    child: _loading
+                        ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                        : const Text('登录'),
+                  ),
+                  const SizedBox(height: 12),
+                  TextButton(
+                    onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => const RegisterPage()),
+                    ),
+                    child: const Text('没有账号？注册课题组'),
+                  ),
+                ] else ...[
+                  // ---- 校园网接入指南 ----
+                  Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        children: [
+                          Icon(Icons.wifi, size: 48, color: Theme.of(context).colorScheme.primary),
+                          const SizedBox(height: 12),
+                          Text('校园网使用说明', style: Theme.of(context).textTheme.titleSmall),
+                          const SizedBox(height: 16),
+                          _networkStep(1, '连接校园网 WiFi（HFUT-WLAN）或使用 VPN'),
+                          const SizedBox(height: 8),
+                          _networkStep(2, '打开浏览器访问 WebVPN 门户'),
+                          const SizedBox(height: 8),
+                          _networkStep(3, '使用统一身份认证（学号/工号 + 密码）登录'),
+                          const SizedBox(height: 8),
+                          _networkStep(4, '在浏览器中打开本平台的地址即可使用'),
+                          const SizedBox(height: 20),
+                          OutlinedButton.icon(
+                            onPressed: () {},
+                            icon: const Icon(Icons.open_in_new, size: 18),
+                            label: const Text('打开 WebVPN'),
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            '在校内网络环境下可直接访问平台地址，无需 VPN。\n如有疑问请联系课题组管理员。',
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+
+                const SizedBox(height: 8),
+                TextButton(
+                  onPressed: () => context.go('/search'),
+                  child: const Text('先逛逛'),
+                ),
               ],
             ),
-            const SizedBox(height: 24),
-
-            FilledButton(
-              onPressed: _loading ? null : _login,
-              child: _loading
-                  ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                  : const Text('登录'),
-            ),
-            const SizedBox(height: 12),
-
-            TextButton(
-              onPressed: () => Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const RegisterPage()),
-              ),
-              child: const Text('没有账号？注册课题组'),
-            ),
-            const SizedBox(height: 4),
-            TextButton(
-              onPressed: () => context.go('/search'),
-              child: const Text('先逛逛'),
-            ),
-          ],
+          ),
         ),
       ),
+    );
+  }
+
+  Widget _networkStep(int number, String text) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 22, height: 22,
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.primary,
+            shape: BoxShape.circle,
+          ),
+          child: Center(
+            child: Text('$number', style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(child: Text(text, style: Theme.of(context).textTheme.bodyMedium)),
+      ],
     );
   }
 }
