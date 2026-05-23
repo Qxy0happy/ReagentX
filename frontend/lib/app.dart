@@ -121,6 +121,7 @@ class _ProfilePageState extends State<_ProfilePage> {
   List<Map<String, dynamic>>? _members;
   List<Map<String, dynamic>> _inquiries = [];
   bool _loading = false;
+  bool _showArchived = false;
 
   @override
   void didChangeDependencies() {
@@ -618,18 +619,38 @@ class _ProfilePageState extends State<_ProfilePage> {
   }
 
   Widget _buildInquiriesSection() {
+    final pending = _inquiries.where((i) => i['status'] == 'pending').toList();
+    final archived = _inquiries.where((i) => i['status'] != 'pending').toList();
+    final list = _showArchived ? archived : pending;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('留言箱', style: Theme.of(context).textTheme.titleMedium),
+        Row(
+          children: [
+            Text('留言箱', style: Theme.of(context).textTheme.titleMedium),
+            const Spacer(),
+            if (_inquiries.isNotEmpty)
+              TextButton.icon(
+                onPressed: () => setState(() => _showArchived = !_showArchived),
+                icon: Icon(_showArchived ? Icons.inbox : Icons.archive_outlined, size: 18),
+                label: Text(_showArchived ? '待处理 (${pending.length})' : '归档 (${archived.length})'),
+              ),
+          ],
+        ),
         const SizedBox(height: 8),
-        if (_inquiries.isEmpty)
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 16),
-            child: Center(child: Text('暂无留言', style: TextStyle(color: Colors.grey))),
+        if (list.isEmpty)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            child: Center(
+              child: Text(
+                _showArchived ? '暂无已归档消息' : '暂无待处理留言',
+                style: const TextStyle(color: Colors.grey),
+              ),
+            ),
           )
         else
-          ..._inquiries.map((inq) => Card(
+          ...list.map((inq) => Card(
             margin: const EdgeInsets.only(bottom: 8),
             child: Padding(
               padding: const EdgeInsets.all(12),
@@ -638,7 +659,15 @@ class _ProfilePageState extends State<_ProfilePage> {
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.message_outlined, size: 16, color: Theme.of(context).colorScheme.primary),
+                      Icon(
+                        inq['status'] == 'archived'
+                            ? Icons.archive_outlined
+                            : Icons.message_outlined,
+                        size: 16,
+                        color: inq['status'] == 'archived'
+                            ? Colors.grey
+                            : Theme.of(context).colorScheme.primary,
+                      ),
                       const SizedBox(width: 6),
                       Text(inq['item_name'] as String? ?? '', style: Theme.of(context).textTheme.titleSmall),
                       const Spacer(),
@@ -689,6 +718,17 @@ class _ProfilePageState extends State<_ProfilePage> {
                             ),
                           ],
                         ),
+                      if (inq['status'] == 'accepted' || inq['status'] == 'rejected')
+                        OutlinedButton.icon(
+                          onPressed: () => _updateInquiryStatus(inq['id'] as int, 'archived'),
+                          icon: const Icon(Icons.archive_outlined, size: 14),
+                          label: const Text('归档', style: TextStyle(fontSize: 12)),
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            minimumSize: Size.zero,
+                            visualDensity: VisualDensity.compact,
+                          ),
+                        ),
                     ],
                   ),
                 ],
@@ -701,6 +741,7 @@ class _ProfilePageState extends State<_ProfilePage> {
 
   Widget _statusChip(String status) {
     final (label, color) = switch (status) {
+      'archived' => ('已归档', Colors.grey),
       'accepted' => ('已联系', Colors.green),
       'rejected' => ('已婉拒', Colors.grey),
       _ => ('待处理', Colors.orange),

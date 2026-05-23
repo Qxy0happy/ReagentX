@@ -138,7 +138,7 @@ func UpdateInquiryHandler(db *sql.DB) gin.HandlerFunc {
 			return
 		}
 
-		if body.Status != "accepted" && body.Status != "rejected" {
+		if body.Status != "accepted" && body.Status != "rejected" && body.Status != "archived" {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "status must be accepted or rejected"})
 			return
 		}
