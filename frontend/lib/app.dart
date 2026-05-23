@@ -124,6 +124,7 @@ class _ProfilePageState extends State<_ProfilePage> {
   List<Map<String, dynamic>> _myInquiries = [];
   bool _loading = false;
   bool _showArchived = false;
+  bool _showMyArchived = false;
 
   @override
   void didChangeDependencies() {
@@ -707,72 +708,111 @@ class _ProfilePageState extends State<_ProfilePage> {
 
   Widget _buildMyInquiriesSection() {
     if (_myInquiries.isEmpty) return const SizedBox.shrink();
+    final active = _myInquiries.where((i) => i['status'] != 'archived').toList();
+    final archived = _myInquiries.where((i) => i['status'] == 'archived').toList();
+    final list = _showMyArchived ? archived : active;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('我的留言', style: Theme.of(context).textTheme.titleMedium),
-        const SizedBox(height: 8),
-        ..._myInquiries.map((inq) => Card(
-          margin: const EdgeInsets.only(bottom: 8),
-          child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Icon(Icons.send_outlined, size: 16, color: Theme.of(context).colorScheme.primary),
-                    const SizedBox(width: 6),
-                    Expanded(child: Text(inq['item_name'] as String? ?? '',
-                      style: Theme.of(context).textTheme.titleSmall)),
-                  ],
+        Row(
+          children: [
+            Text('我的留言', style: Theme.of(context).textTheme.titleMedium),
+            const Spacer(),
+            if (_myInquiries.isNotEmpty)
+              TextButton.icon(
+                onPressed: () => setState(() => _showMyArchived = !_showMyArchived),
+                icon: Icon(_showMyArchived ? Icons.send : Icons.archive_outlined, size: 18),
+                label: Text(
+                  _showMyArchived
+                      ? '进行中 (${active.length})'
+                      : '已归档 (${archived.length})',
                 ),
-                const SizedBox(height: 4),
-                Text('我: ${inq['message'] as String? ?? ''}',
-                  style: Theme.of(context).textTheme.bodyMedium),
-                if ((inq['reply_text'] as String? ?? '').isNotEmpty) ...[
-                  const SizedBox(height: 6),
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3),
-                      borderRadius: BorderRadius.circular(8),
+              ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        if (list.isEmpty)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            child: Center(
+              child: Text(
+                _showMyArchived ? '暂无已归档留言' : '暂无进行中的留言',
+                style: const TextStyle(color: Colors.grey),
+              ),
+            ),
+          )
+        else
+          ...list.map((inq) => Card(
+            margin: const EdgeInsets.only(bottom: 8),
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.send_outlined, size: 16, color: Theme.of(context).colorScheme.primary),
+                      const SizedBox(width: 6),
+                      Expanded(child: Text(inq['item_name'] as String? ?? '',
+                        style: Theme.of(context).textTheme.titleSmall)),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Text('我: ${inq['message'] as String? ?? ''}',
+                    style: Theme.of(context).textTheme.bodyMedium),
+                  if ((inq['reply_text'] as String? ?? '').isNotEmpty) ...[
+                    const SizedBox(height: 6),
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(Icons.reply, size: 14, color: Theme.of(context).colorScheme.primary),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('对方回复: ${inq['reply_text']}',
+                                  style: Theme.of(context).textTheme.bodySmall),
+                                if ((inq['replied_at'] as String? ?? '').isNotEmpty)
+                                  Text(inq['replied_at'],
+                                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: Colors.grey, fontSize: 10)),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Icon(Icons.reply, size: 14, color: Theme.of(context).colorScheme.primary),
-                        const SizedBox(width: 6),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text('对方回复: ${inq['reply_text']}',
-                                style: Theme.of(context).textTheme.bodySmall),
-                              if ((inq['replied_at'] as String? ?? '').isNotEmpty)
-                                Text(inq['replied_at'],
-                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: Colors.grey, fontSize: 10)),
-                            ],
+                  ],
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      _statusChip(inq['status'] as String? ?? ''),
+                      const Spacer(),
+                      if (inq['status'] == 'accepted' || inq['status'] == 'rejected')
+                        OutlinedButton.icon(
+                          onPressed: () => _updateMyInquiryStatus(inq['id'] as int, 'archived'),
+                          icon: const Icon(Icons.archive_outlined, size: 14),
+                          label: const Text('归档', style: TextStyle(fontSize: 12)),
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            minimumSize: Size.zero,
+                            visualDensity: VisualDensity.compact,
                           ),
                         ),
-                      ],
-                    ),
+                    ],
                   ),
                 ],
-                const SizedBox(height: 4),
-                Row(
-                  children: [
-                    _statusChip(inq['status'] as String? ?? ''),
-                    const Spacer(),
-                    Text(inq['created_at'] as String? ?? '',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey, fontSize: 11)),
-                  ],
-                ),
-              ],
+              ),
             ),
-          ),
-        )),
+          )),
       ],
     );
   }
@@ -999,6 +1039,17 @@ class _ProfilePageState extends State<_ProfilePage> {
       if (resp.statusCode == 200) {
         _loadInquiries();
       }
+    } catch (_) {}
+  }
+
+  Future<void> _updateMyInquiryStatus(int id, String status) async {
+    try {
+      await http.patch(
+        ApiConfig.uri('/api/v1/inquiries/$id'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'status': status}),
+      );
+      _loadMyInquiries();
     } catch (_) {}
   }
 
