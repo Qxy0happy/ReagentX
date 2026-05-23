@@ -12,7 +12,6 @@ import 'screens/home_screen.dart';
 import 'screens/search_screen.dart';
 import 'screens/camera_screen.dart';
 import 'screens/publish_screen.dart';
-import 'screens/login_screen.dart';
 
 class ReagentXApp extends StatelessWidget {
   const ReagentXApp({super.key});
@@ -34,10 +33,6 @@ class ReagentXApp extends StatelessWidget {
 final GoRouter _router = GoRouter(
   initialLocation: '/',
   routes: [
-    GoRoute(
-      path: '/login',
-      builder: (context, state) => const LoginScreen(),
-    ),
     ShellRoute(
       builder: (context, state, child) => HomeScreen(child: child),
       routes: [
@@ -94,7 +89,7 @@ class _AuthGuard extends StatelessWidget {
             Text('发布和查看个人信息需要登录', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey)),
             const SizedBox(height: 24),
             FilledButton.icon(
-              onPressed: () => context.go('/login'),
+              onPressed: () => context.go('/profile'),
               icon: const Icon(Icons.login),
               label: const Text('去登录'),
             ),
@@ -126,6 +121,36 @@ class _ProfilePageState extends State<_ProfilePage> {
   bool _showArchived = false;
   bool _showMyArchived = false;
 
+  // 登录表单状态
+  String _loginMode = 'login';
+  final _groupCtrl = TextEditingController();
+  final _userCtrl = TextEditingController();
+  final _pwdCtrl = TextEditingController();
+  final _newTeacherCtrl = TextEditingController();
+  final _newLabCtrl = TextEditingController();
+  final _newUserCtrl = TextEditingController();
+  final _newPwdCtrl = TextEditingController();
+  String _newRole = 'member';
+  String? _loginError;
+
+  @override
+  void initState() {
+    super.initState();
+    context.read<AuthProvider>().fetchAllGroups();
+  }
+
+  @override
+  void dispose() {
+    _groupCtrl.dispose();
+    _userCtrl.dispose();
+    _pwdCtrl.dispose();
+    _newTeacherCtrl.dispose();
+    _newLabCtrl.dispose();
+    _newUserCtrl.dispose();
+    _newPwdCtrl.dispose();
+    super.dispose();
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -156,6 +181,70 @@ class _ProfilePageState extends State<_ProfilePage> {
     } catch (_) {}
     if (mounted) setState(() => _loading = false);
   }
+
+  // --- 登录/注册逻辑 ---
+
+  Future<void> _login() async {
+    final teacherName = _groupCtrl.text.trim();
+    final userName = _userCtrl.text.trim();
+    final password = _pwdCtrl.text;
+    if (teacherName.isEmpty || userName.isEmpty || password.isEmpty) {
+      setState(() => _loginError = '请填写所有字段');
+      return;
+    }
+    setState(() { _loading = true; _loginError = null; });
+    try {
+      await context.read<AuthProvider>().login(
+        teacherName: teacherName,
+        userName: userName,
+        password: password,
+      );
+      if (mounted) {
+        _groupCtrl.clear();
+        _userCtrl.clear();
+        _pwdCtrl.clear();
+      }
+    } catch (e) {
+      if (mounted) setState(() => _loginError = '登录失败: $e');
+    }
+    if (mounted) setState(() => _loading = false);
+  }
+
+  Future<void> _register() async {
+    if (_newTeacherCtrl.text.trim().isEmpty || _newUserCtrl.text.trim().isEmpty || _newPwdCtrl.text.isEmpty) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('请填写所有必填项')));
+      return;
+    }
+    setState(() => _loading = true);
+    try {
+      await context.read<AuthProvider>().register(
+        teacherName: _newTeacherCtrl.text.trim(),
+        password: _newPwdCtrl.text,
+        memberPassword: _newPwdCtrl.text,
+        labLocation: _newLabCtrl.text.trim(),
+        members: [_newUserCtrl.text.trim()],
+      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('注册成功，请切换到登录')),
+        );
+        setState(() {
+          _loginMode = 'login';
+          _newTeacherCtrl.clear();
+          _newLabCtrl.clear();
+          _newUserCtrl.clear();
+          _newPwdCtrl.clear();
+        });
+      }
+    } catch (e) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('注册失败: $e')));
+    }
+    if (mounted) setState(() => _loading = false);
+  }
+
+  // --- 物品管理 ---
 
   Future<void> _deleteItem(int itemId) async {
     final auth = context.read<AuthProvider>();
@@ -420,9 +509,152 @@ class _ProfilePageState extends State<_ProfilePage> {
     }
   }
 
+  Widget _buildLoginForm(AuthProvider auth) {
+    return Scaffold(
+      body: SingleChildScrollView(
+        padding: EdgeInsets.only(
+          left: 24, right: 24,
+          top: MediaQuery.of(context).padding.top + 48,
+        ),
+        child: Column(
+          children: [
+            Icon(Icons.science, size: 64, color: Theme.of(context).colorScheme.primary),
+            const SizedBox(height: 8),
+            Text('ReagentX', style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold)),
+            const SizedBox(height: 4),
+            Text('课题组试剂管理平台', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey)),
+            const SizedBox(height: 32),
+
+            // 登录/注册 Tab
+            SegmentedButton<String>(
+              segments: const [
+                ButtonSegment(value: 'login', label: Text('登录')),
+                ButtonSegment(value: 'register', label: Text('注册')),
+              ],
+              selected: {_loginMode},
+              onSelectionChanged: (v) => setState(() => _loginMode = v.first),
+            ),
+            const SizedBox(height: 24),
+
+            if (_loginMode == 'register') ...[
+              TextField(
+                controller: _newTeacherCtrl,
+                decoration: const InputDecoration(labelText: '指导教师 *', border: OutlineInputBorder()),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: _newLabCtrl,
+                decoration: const InputDecoration(labelText: '实验室地址', border: OutlineInputBorder()),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: _newUserCtrl,
+                decoration: const InputDecoration(labelText: '您的姓名 *', border: OutlineInputBorder()),
+              ),
+              const SizedBox(height: 12),
+              DropdownButtonFormField<String>(
+                value: _newRole,
+                decoration: const InputDecoration(labelText: '角色 *', border: OutlineInputBorder()),
+                items: const [
+                  DropdownMenuItem(value: 'teacher', child: Text('教师 👑')),
+                  DropdownMenuItem(value: 'member', child: Text('成员')),
+                ],
+                onChanged: (v) => setState(() => _newRole = v!),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: _newPwdCtrl,
+                obscureText: true,
+                decoration: const InputDecoration(labelText: '密码 *', border: OutlineInputBorder()),
+              ),
+              const SizedBox(height: 24),
+              FilledButton(
+                onPressed: _loading ? null : _register,
+                child: _loading
+                    ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                    : const Text('注册'),
+              ),
+            ] else ...[
+              TextField(
+                controller: _groupCtrl,
+                decoration: const InputDecoration(
+                  labelText: '指导教师或课题组',
+                  hintText: '支持搜索',
+                  border: OutlineInputBorder(),
+                ),
+                onChanged: (q) {
+                  if (q.length >= 1) context.read<AuthProvider>().fetchAllGroups();
+                },
+              ),
+              Consumer<AuthProvider>(
+                builder: (_, auth, __) {
+                  final q = _groupCtrl.text.trim().toLowerCase();
+                  if (q.isEmpty) return const SizedBox.shrink();
+                  final filtered = auth.allGroups.where((s) =>
+                    (s['teacher'] as String? ?? '').toLowerCase().contains(q) ||
+                    (s['group_name'] as String? ?? '').toLowerCase().contains(q)
+                  ).take(5).toList();
+                  if (filtered.isEmpty) return const SizedBox.shrink();
+                  return Card(
+                    margin: EdgeInsets.zero,
+                    child: Column(
+                      children: filtered.map((s) => ListTile(
+                        dense: true,
+                        leading: const Icon(Icons.group, size: 20),
+                        title: Text(s['teacher'] as String? ?? ''),
+                        subtitle: Text('${s['group_name']} · ${s['lab_location']}',
+                          style: Theme.of(context).textTheme.bodySmall),
+                        onTap: () {
+                          _groupCtrl.text = s['teacher'] as String? ?? '';
+                          _groupCtrl.selection = TextSelection.fromPosition(
+                            TextPosition(offset: _groupCtrl.text.length));
+                        },
+                      )).toList(),
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: _userCtrl,
+                decoration: const InputDecoration(labelText: '姓名 *', border: OutlineInputBorder()),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: _pwdCtrl,
+                obscureText: true,
+                decoration: const InputDecoration(labelText: '密码 *', border: OutlineInputBorder()),
+              ),
+              const SizedBox(height: 4),
+              if (_loginError != null)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Text(_loginError!, style: TextStyle(color: Theme.of(context).colorScheme.error, fontSize: 13)),
+                ),
+              const SizedBox(height: 20),
+              FilledButton(
+                onPressed: _loading ? null : _login,
+                style: FilledButton.styleFrom(minimumSize: const Size(double.infinity, 48)),
+                child: _loading
+                    ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                    : const Text('登录'),
+              ),
+            ],
+
+            const SizedBox(height: 32),
+            Text('ReagentX · 试剂管理平台', style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey)),
+            const SizedBox(height: 16),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
+    if (!auth.isLoggedIn) return _buildLoginForm(auth);
+
     return Scaffold(
       body: ListView(
         padding: const EdgeInsets.all(16),
