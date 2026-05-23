@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -21,6 +22,8 @@ type InquiryResp struct {
 	FromUserID   string `json:"from_user_id"`
 	FromUserName string `json:"from_user_name"`
 	Message      string `json:"message"`
+	ReplyText    string `json:"reply_text"`
+	RepliedAt    string `json:"replied_at"`
 	Status       string `json:"status"`
 	CreatedAt    string `json:"created_at"`
 }
@@ -46,7 +49,6 @@ func CreateInquiryHandler(db *sql.DB) gin.HandlerFunc {
 			return
 		}
 
-		// 获取留言者姓名
 		var fromUserName string
 		err = db.QueryRow("SELECT name FROM users WHERE id = ?", fromUserID).Scan(&fromUserName)
 		if err != nil {
@@ -54,7 +56,6 @@ func CreateInquiryHandler(db *sql.DB) gin.HandlerFunc {
 			return
 		}
 
-		// 检查物品是否存在
 		var exists bool
 		err = db.QueryRow("SELECT EXISTS(SELECT 1 FROM items WHERE id = ?)", itemID).Scan(&exists)
 		if err != nil || !exists {
@@ -76,12 +77,11 @@ func CreateInquiryHandler(db *sql.DB) gin.HandlerFunc {
 	}
 }
 
-// ListInquiriesHandler  GET /api/v1/users/:userId/inquiries  获取该用户收到的留言（所属课题组的物品留言）
+// ListInquiriesHandler  GET /api/v1/users/:id/inquiries  收到的留言（本组物品的留言）
 func ListInquiriesHandler(db *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userID := c.Param("id")
 
-		// 查出该用户所在课题组
 		var groupID string
 		err := db.QueryRow("SELECT group_id FROM users WHERE id = ?", userID).Scan(&groupID)
 		if err != nil {
@@ -91,7 +91,7 @@ func ListInquiriesHandler(db *sql.DB) gin.HandlerFunc {
 
 		rows, err := db.Query(`
 			SELECT i.id, i.item_id, sp.name, i.from_user_id, i.from_user_name,
-			       i.message, i.status, i.created_at
+			       i.message, i.reply_text, i.replied_at, i.status, i.created_at
 			FROM inquiries i
 			JOIN items it ON it.id = i.item_id
 			JOIN skus sk ON sk.id = it.sku_id
@@ -111,7 +111,8 @@ func ListInquiriesHandler(db *sql.DB) gin.HandlerFunc {
 		for rows.Next() {
 			var r InquiryResp
 			if err := rows.Scan(&r.ID, &r.ItemID, &r.ItemName, &r.FromUserID,
-				&r.FromUserName, &r.Message, &r.Status, &r.CreatedAt); err != nil {
+				&r.FromUserName, &r.Message, &r.ReplyText, &r.RepliedAt,
+				&r.Status, &r.CreatedAt); err != nil {
 				continue
 			}
 			inquiries = append(inquiries, r)
@@ -121,7 +122,88 @@ func ListInquiriesHandler(db *sql.DB) gin.HandlerFunc {
 	}
 }
 
-// UpdateInquiryHandler  PATCH /api/v1/inquiries/:id  更新留言状态（accepted / rejected）
+// ListMyInquiriesHandler  GET /api/v1/users/:id/my-inquiries  我发出的留言
+func ListMyInquiriesHandler(db *sql.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		userID := c.Param("id")
+
+		rows, err := db.Query(`
+			SELECT i.id, i.item_id, sp.name, i.from_user_id, i.from_user_name,
+			       i.message, i.reply_text, i.replied_at, i.status, i.created_at
+			FROM inquiries i
+			JOIN items it ON it.id = i.item_id
+			JOIN skus sk ON sk.id = it.sku_id
+			JOIN spus sp ON sp.id = sk.spu_id
+			WHERE i.from_user_id = ?
+			ORDER BY i.created_at DESC
+		`, userID)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		defer rows.Close()
+
+		inquiries := make([]InquiryResp, 0)
+		for rows.Next() {
+			var r InquiryResp
+			if err := rows.Scan(&r.ID, &r.ItemID, &r.ItemName, &r.FromUserID,
+				&r.FromUserName, &r.Message, &r.ReplyText, &r.RepliedAt,
+				&r.Status, &r.CreatedAt); err != nil {
+				continue
+			}
+			inquiries = append(inquiries, r)
+		}
+
+		c.JSON(http.StatusOK, gin.H{"inquiries": inquiries})
+	}
+}
+
+// ReplyInquiryHandler  POST /api/v1/inquiries/:id/reply  回复留言（自动设为 accepted）
+func ReplyInquiryHandler(db *sql.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		id, err := strconv.ParseInt(c.Param("id"), 10, 64)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid inquiry id"})
+			return
+		}
+
+		var body struct {
+			ReplyText string `json:"reply_text"`
+		}
+		if err := c.ShouldBindJSON(&body); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		if body.ReplyText == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "reply_text is required"})
+			return
+		}
+
+		now := time.Now().UTC().Format("2006-01-02 15:04:05")
+		result, err := db.Exec(
+			"UPDATE inquiries SET reply_text = ?, replied_at = ?, status = 'accepted' WHERE id = ?",
+			body.ReplyText, now, id,
+		)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		affected, _ := result.RowsAffected()
+		if affected == 0 {
+			c.JSON(http.StatusNotFound, gin.H{"error": "inquiry not found"})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"status":     "accepted",
+			"reply_text": body.ReplyText,
+			"replied_at": now,
+		})
+	}
+}
+
+// UpdateInquiryHandler  PATCH /api/v1/inquiries/:id  更新留言状态（accepted / rejected / archived）
 func UpdateInquiryHandler(db *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id, err := strconv.ParseInt(c.Param("id"), 10, 64)
@@ -139,7 +221,7 @@ func UpdateInquiryHandler(db *sql.DB) gin.HandlerFunc {
 		}
 
 		if body.Status != "accepted" && body.Status != "rejected" && body.Status != "archived" {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "status must be accepted or rejected"})
+			c.JSON(http.StatusBadRequest, gin.H{"error": "status must be accepted, rejected or archived"})
 			return
 		}
 

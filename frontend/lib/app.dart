@@ -121,6 +121,7 @@ class _ProfilePageState extends State<_ProfilePage> {
   List<Map<String, dynamic>>? _items;
   List<Map<String, dynamic>>? _members;
   List<Map<String, dynamic>> _inquiries = [];
+  List<Map<String, dynamic>> _myInquiries = [];
   bool _loading = false;
   bool _showArchived = false;
 
@@ -129,6 +130,7 @@ class _ProfilePageState extends State<_ProfilePage> {
     super.didChangeDependencies();
     _loadAll();
     _loadInquiries();
+    _loadMyInquiries();
   }
 
   Future<void> _loadAll() async {
@@ -599,6 +601,8 @@ class _ProfilePageState extends State<_ProfilePage> {
           const SizedBox(height: 16),
           _buildUpdateSection(),
           const SizedBox(height: 16),
+          _buildMyInquiriesSection(),
+          const SizedBox(height: 16),
           _buildInquiriesSection(),
         ],
       ),
@@ -686,6 +690,92 @@ class _ProfilePageState extends State<_ProfilePage> {
     );
   }
 
+  Future<void> _loadMyInquiries() async {
+    final auth = context.read<AuthProvider>();
+    if (auth.userId == null) return;
+    try {
+      final resp = await http.get(
+        ApiConfig.uri('/api/v1/users/${auth.userId}/my-inquiries'),
+      );
+      if (resp.statusCode == 200) {
+        final body = jsonDecode(resp.body);
+        _myInquiries = (body['inquiries'] as List).cast<Map<String, dynamic>>();
+      }
+    } catch (_) {}
+  }
+
+  Widget _buildMyInquiriesSection() {
+    if (_myInquiries.isEmpty) return const SizedBox.shrink();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('我的留言', style: Theme.of(context).textTheme.titleMedium),
+        const SizedBox(height: 8),
+        ..._myInquiries.map((inq) => Card(
+          margin: const EdgeInsets.only(bottom: 8),
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(Icons.send_outlined, size: 16, color: Theme.of(context).colorScheme.primary),
+                    const SizedBox(width: 6),
+                    Expanded(child: Text(inq['item_name'] as String? ?? '',
+                      style: Theme.of(context).textTheme.titleSmall)),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text('我: ${inq['message'] as String? ?? ''}',
+                  style: Theme.of(context).textTheme.bodyMedium),
+                if ((inq['reply_text'] as String? ?? '').isNotEmpty) ...[
+                  const SizedBox(height: 6),
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(Icons.reply, size: 14, color: Theme.of(context).colorScheme.primary),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('对方回复: ${inq['reply_text']}',
+                                style: Theme.of(context).textTheme.bodySmall),
+                              if ((inq['replied_at'] as String? ?? '').isNotEmpty)
+                                Text(inq['replied_at'],
+                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: Colors.grey, fontSize: 10)),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    _statusChip(inq['status'] as String? ?? ''),
+                    const Spacer(),
+                    Text(inq['created_at'] as String? ?? '',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey, fontSize: 11)),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        )),
+      ],
+    );
+  }
+
   Future<void> _loadInquiries() async {
     final auth = context.read<AuthProvider>();
     if (auth.userId == null) return;
@@ -770,6 +860,36 @@ class _ProfilePageState extends State<_ProfilePage> {
                     const SizedBox(height: 4),
                     Text(inq['message'] as String? ?? '', style: Theme.of(context).textTheme.bodyMedium),
                   ],
+                  if ((inq['reply_text'] as String? ?? '').isNotEmpty) ...[
+                    const SizedBox(height: 6),
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(Icons.reply, size: 14, color: Theme.of(context).colorScheme.primary),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('回复: ${inq['reply_text']}',
+                                  style: Theme.of(context).textTheme.bodySmall),
+                                if ((inq['replied_at'] as String? ?? '').isNotEmpty)
+                                  Text(inq['replied_at'],
+                                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: Colors.grey, fontSize: 10)),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                   const SizedBox(height: 8),
                   Row(
                     children: [
@@ -780,9 +900,9 @@ class _ProfilePageState extends State<_ProfilePage> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             FilledButton.tonalIcon(
-                              onPressed: () => _updateInquiryStatus(inq['id'] as int, 'accepted'),
-                              icon: const Icon(Icons.check, size: 14),
-                              label: const Text('已联系', style: TextStyle(fontSize: 12)),
+                              onPressed: () => _replyToInquiry(inq['id'] as int, inq['item_name'] as String? ?? ''),
+                              icon: const Icon(Icons.reply, size: 14),
+                              label: const Text('回复', style: TextStyle(fontSize: 12)),
                               style: FilledButton.styleFrom(
                                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                                 minimumSize: Size.zero,
@@ -838,6 +958,44 @@ class _ProfilePageState extends State<_ProfilePage> {
       ),
       child: Text(label, style: TextStyle(fontSize: 11, color: color, fontWeight: FontWeight.w500)),
     );
+  }
+
+  Future<void> _replyToInquiry(int id, String itemName) async {
+    final textCtrl = TextEditingController();
+    final reply = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('回复: $itemName'),
+        content: TextField(
+          controller: textCtrl,
+          autofocus: true,
+          maxLines: 3,
+          decoration: const InputDecoration(
+            hintText: '输入回复内容…',
+            border: OutlineInputBorder(),
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('取消')),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, textCtrl.text.trim()),
+            child: const Text('发送回复'),
+          ),
+        ],
+      ),
+    );
+    if (reply == null || reply.isEmpty) return;
+
+    try {
+      final resp = await http.post(
+        ApiConfig.uri('/api/v1/inquiries/$id/reply'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'reply_text': reply}),
+      );
+      if (resp.statusCode == 200) {
+        _loadInquiries();
+      }
+    } catch (_) {}
   }
 
   Future<void> _updateInquiryStatus(int id, String status) async {

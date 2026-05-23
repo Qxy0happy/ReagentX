@@ -64,6 +64,8 @@ func main() {
 		// 留言
 		api.POST("/items/:id/inquire", handlers.CreateInquiryHandler(db))
 		api.GET("/users/:id/inquiries", handlers.ListInquiriesHandler(db))
+		api.GET("/users/:id/my-inquiries", handlers.ListMyInquiriesHandler(db))
+		api.POST("/inquiries/:id/reply", handlers.ReplyInquiryHandler(db))
 		api.PATCH("/inquiries/:id", handlers.UpdateInquiryHandler(db))
 
 		// 发布
@@ -133,6 +135,8 @@ func runMigrations(db *sql.DB) error {
 		from_user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
 		from_user_name TEXT NOT NULL DEFAULT '',
 		message TEXT NOT NULL DEFAULT '',
+		reply_text TEXT NOT NULL DEFAULT '',
+		replied_at TEXT NOT NULL DEFAULT '',
 		status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending','accepted','rejected','archived')),
 		created_at TEXT NOT NULL DEFAULT (datetime('now'))
 	);
