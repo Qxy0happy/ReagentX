@@ -39,6 +39,9 @@ app.*.symbols
 # Obfuscation related
 app.*.map.json
 
+# build-time config (copy from config.example.json)
+/config.json
+
 # Android Studio will place build artifacts here
 /android/app/debug
 /android/app/profile
