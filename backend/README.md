@@ -71,6 +71,16 @@ PUT    /api/v1/groups/:id/members/:userId    — 修改成员名
 DELETE /api/v1/groups/:id/members/:userId    — 删除成员
 ```
 
+### 留言
+
+```
+POST   /api/v1/items/:id/inquire         — 对某试剂留言（我想要）
+GET    /api/v1/users/:id/inquiries       — 收到的留言（本组物品的留言）
+GET    /api/v1/users/:id/my-inquiries    — 我发出的留言
+POST   /api/v1/inquiries/:id/reply       — 回复留言（自动设为 accepted）
+PATCH  /api/v1/inquiries/:id             — 更新留言状态（rejected/archived）
+```
+
 ### 用户
 
 ```
@@ -81,9 +91,10 @@ PUT  /api/v1/users/:id/password — 修改密码
 ## 项目结构
 
 ```
-├── main.go             # 入口 + 路由注册 + 建表
+├── main.go             # 入口 + 路由注册 + 建表迁移
 ├── handlers/
 │   ├── auth.go         # 注册/登录/成员管理/密码修改
+│   ├── inquiry.go      # 留言 CRUD + 回复
 │   ├── item.go         # 物品 CRUD + PubChem 别名展开
 │   ├── search.go       # FTS5 搜索 + 评分排序
 │   └── user_items.go   # 用户物品列表

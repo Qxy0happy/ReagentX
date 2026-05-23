@@ -27,12 +27,16 @@ go run .
 ```
 lib/
 ├── main.dart                  # 入口
-├── app.dart                   # 主页 + 个人页（成员管理/物品管理）
+├── app.dart                   # 主页（底部导航）+ 个人页（登录/成员管理/物品/留言/检查更新）
+├── config/
+│   └── api_config.dart        # API 基础地址（编译期 dart-define）
 ├── providers/
 │   ├── auth_provider.dart     # 登录态/会话管理
-│   └── camera_provider.dart   # 相机状态
+│   ├── camera_provider.dart   # 相机状态
+│   ├── inquiry_provider.dart  # 留言未读数 badge
+│   └── update_provider.dart   # 检查更新
 ├── screens/
-│   ├── login_screen.dart      # 登录/注册
+│   ├── login_screen.dart      # 登录/注册（不再通过路由访问，保留备用）
 │   ├── home_screen.dart       # 首页 + 搜索
 │   ├── search_screen.dart     # 搜索结果
 │   ├── publish_screen.dart    # 发布物品
@@ -43,8 +47,11 @@ lib/
 
 ## 功能
 
-- 教师注册/登录，创建课题组
-- 成员登录（同组）
-- 发布试剂物品（名称、CAS、品牌、规格、剩余量、照片）
-- 搜索试剂（FTS5 + PubChem 别名展开）
-- 个人页：查看/增删改成员、修改密码、管理物品、修改剩余量
+- **课题负责人注册/登录**：在「我的」页面完成，无需独立登录页
+- **成员登录**：同组
+- **发布试剂**：名称、CAS、品牌、规格、存放位置、剩余量（多/中/少）、照片
+- **搜索试剂**：FTS5 + PubChem 别名展开，支持语义标签
+- **留言（我想要）**：对试剂留言，课题负责人可回复
+- **我的留言**：查看发出的留言及对方回复
+- **个人页**：成员管理、密码修改、物品管理（删除/修改剩余量）、检查更新
+- **编译期后端地址**：`flutter run --dart-define-from-file=config.json`
