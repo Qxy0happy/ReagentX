@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+import '../config/api_config.dart';
 import '../providers/auth_provider.dart';
 
 class PublishScreen extends StatefulWidget {
@@ -55,7 +56,7 @@ class _PublishScreenState extends State<PublishScreen> {
     try {
       final request = http.MultipartRequest(
         'POST',
-        Uri.parse('http://localhost:8080/api/v1/items'),
+        ApiConfig.uri('/api/v1/items'),
       );
 
       request.fields['name'] = _nameCtrl.text.trim();

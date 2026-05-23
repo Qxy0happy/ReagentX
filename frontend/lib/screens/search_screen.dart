@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import '../config/api_config.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -37,7 +38,7 @@ class _SearchScreenState extends State<SearchScreen> {
     setState(() => _loading = true);
     try {
       final resp = await http.get(
-        Uri.parse('http://localhost:8080/api/v1/search?q=${Uri.encodeQueryComponent(q)}'),
+        ApiConfig.uri('/api/v1/search?q=${Uri.encodeQueryComponent(q)}'),
       );
       if (resp.statusCode == 200) {
         final body = jsonDecode(resp.body) as Map<String, dynamic>;
@@ -125,7 +126,7 @@ class _SearchScreenState extends State<SearchScreen> {
                           final r = _results[i];
                           final imagePath = r['image_path'] as String? ?? '';
                           final imageUrl = imagePath.isNotEmpty
-                              ? 'http://localhost:8080/$imagePath'
+                              ? ApiConfig.url('/$imagePath')
                               : null;
 
                           return ListTile(

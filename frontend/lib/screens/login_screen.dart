@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
+import '../config/api_config.dart';
 import '../providers/auth_provider.dart';
 
 /// ---- 登录页 ----
@@ -96,7 +97,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   if (gid != null) {
                     try {
                       final resp = await http.get(
-                        Uri.parse('http://localhost:8080/api/v1/groups/$gid'),
+                        ApiConfig.uri('/api/v1/groups/$gid'),
                       );
                       if (resp.statusCode == 200) {
                         final body = jsonDecode(resp.body);

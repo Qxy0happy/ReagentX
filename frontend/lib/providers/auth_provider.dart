@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import '../config/api_config.dart';
 
 class AuthProvider extends ChangeNotifier {
   String? _userId;
@@ -54,7 +55,7 @@ class AuthProvider extends ChangeNotifier {
   Future<void> fetchAllGroups() async {
     try {
       final resp = await http.get(
-        Uri.parse('http://localhost:8080/api/v1/groups/suggest?q='),
+        ApiConfig.uri('/api/v1/groups/suggest?q='),
       );
       if (resp.statusCode == 200) {
         final body = jsonDecode(resp.body);
@@ -71,7 +72,7 @@ class AuthProvider extends ChangeNotifier {
     String memberPassword = '',
     String labLocation = '',
     List<String> members = const [],
-    String serverUrl = 'http://localhost:8080',
+    String serverUrl = ApiConfig.baseUrl,
   }) async {
     final resp = await http.post(
       Uri.parse('$serverUrl/api/v1/register'),
@@ -96,7 +97,7 @@ class AuthProvider extends ChangeNotifier {
     required String teacherName,
     required String userName,
     required String password,
-    String serverUrl = 'http://localhost:8080',
+    String serverUrl = ApiConfig.baseUrl,
   }) async {
     final resp = await http.post(
       Uri.parse('$serverUrl/api/v1/login'),

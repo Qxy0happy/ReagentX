@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
+import 'config/api_config.dart';
 import 'providers/auth_provider.dart';
 import 'screens/home_screen.dart';
 import 'screens/search_screen.dart';
@@ -132,14 +133,14 @@ class _ProfilePageState extends State<_ProfilePage> {
     try {
       // 加载物品
       final itemsResp = await http.get(
-        Uri.parse('http://localhost:8080/api/v1/users/${auth.userId}/items'),
+        ApiConfig.uri('/api/v1/users/${auth.userId}/items'),
       );
       if (itemsResp.statusCode == 200) {
         _items = (jsonDecode(itemsResp.body)['items'] as List).cast<Map<String, dynamic>>();
       }
       // 加载课题组成员
       final groupResp = await http.get(
-        Uri.parse('http://localhost:8080/api/v1/groups/${auth.groupId}'),
+        ApiConfig.uri('/api/v1/groups/${auth.groupId}'),
       );
       if (groupResp.statusCode == 200) {
         _members = (jsonDecode(groupResp.body)['members'] as List).cast<Map<String, dynamic>>();
@@ -166,7 +167,7 @@ class _ProfilePageState extends State<_ProfilePage> {
 
     try {
       final resp = await http.delete(
-        Uri.parse('http://localhost:8080/api/v1/items/$itemId?owner_user_id=${auth.userId}'),
+        ApiConfig.uri('/api/v1/items/$itemId?owner_user_id=${auth.userId}'),
       );
       if (resp.statusCode == 200) {
         _loadAll();
@@ -224,7 +225,7 @@ class _ProfilePageState extends State<_ProfilePage> {
     if (selected == null || selected == current) return;
     try {
       final resp = await http.patch(
-        Uri.parse('http://localhost:8080/api/v1/items/${item['id']}/remaining'),
+        ApiConfig.uri('/api/v1/items/${item['id']}/remaining'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'remaining': selected}),
       );
@@ -278,7 +279,7 @@ class _ProfilePageState extends State<_ProfilePage> {
     try {
       final auth = context.read<AuthProvider>();
       final resp = await http.put(
-        Uri.parse('http://localhost:8080/api/v1/users/${auth.userId}/password'),
+        ApiConfig.uri('/api/v1/users/${auth.userId}/password'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'old_password': oldPw, 'new_password': newPw}),
       );
@@ -332,7 +333,7 @@ class _ProfilePageState extends State<_ProfilePage> {
     try {
       final auth2 = context.read<AuthProvider>();
       final resp = await http.post(
-        Uri.parse('http://localhost:8080/api/v1/groups/${auth2.groupId}/members'),
+        ApiConfig.uri('/api/v1/groups/${auth2.groupId}/members'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'name': name, 'password': password}),
       );
@@ -368,7 +369,7 @@ class _ProfilePageState extends State<_ProfilePage> {
     try {
       final auth = context.read<AuthProvider>();
       final resp = await http.put(
-        Uri.parse('http://localhost:8080/api/v1/groups/${auth.groupId}/members/${m['id']}'),
+        ApiConfig.uri('/api/v1/groups/${auth.groupId}/members/${m['id']}'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'name': name}),
       );
@@ -399,7 +400,7 @@ class _ProfilePageState extends State<_ProfilePage> {
     try {
       final auth = context.read<AuthProvider>();
       final resp = await http.delete(
-        Uri.parse('http://localhost:8080/api/v1/groups/${auth.groupId}/members/${m['id']}'),
+        ApiConfig.uri('/api/v1/groups/${auth.groupId}/members/${m['id']}'),
       );
       if (resp.statusCode == 200) {
         _loadAll();
