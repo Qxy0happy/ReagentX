@@ -49,7 +49,7 @@ jobs:
 
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: "3.29"
+          flutter-version: "3.44"
 
       - name: Install deps
         run: flutter pub get
