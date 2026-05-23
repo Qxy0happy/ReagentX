@@ -203,8 +203,8 @@ func CreateItemHandler(db *sql.DB) gin.HandlerFunc {
 		var itemID int64
 		err = tx.QueryRow(
 			`INSERT INTO items (sku_id, owner_user_id, location, remaining, image_path, search_text, updated_at)
-			 VALUES (?, ?, ?, ?, ?, ?, datetime('now')) RETURNING id`,
-			skuID, ownerUserID, location, remaining, imagePath, searchText,
+			 VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING id`,
+			skuID, ownerUserID, location, remaining, imagePath, searchText, time.Now().Format("2006-01-02 15:04:05"),
 		).Scan(&itemID)
 		if err != nil {
 			log.Printf("insert item failed: %v", err)
@@ -307,7 +307,8 @@ func UpdateItemRemainingHandler(db *sql.DB) gin.HandlerFunc {
 			return
 		}
 
-		result, err := db.Exec(`UPDATE items SET remaining = ?, updated_at = datetime('now') WHERE id = ?`, req.Remaining, itemID)
+		now := time.Now().Format("2006-01-02 15:04:05")
+		result, err := db.Exec(`UPDATE items SET remaining = ?, updated_at = ? WHERE id = ?`, req.Remaining, now, itemID)
 		if err != nil {
 			log.Printf("update remaining failed: %v", err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "update failed"})

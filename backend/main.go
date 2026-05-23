@@ -125,7 +125,7 @@ func runMigrations(db *sql.DB) error {
 		status TEXT NOT NULL DEFAULT 'On' CHECK (status IN ('On', 'Off')),
 		image_path TEXT DEFAULT NULL,
 		search_text TEXT NOT NULL DEFAULT '',
-		updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+		updated_at TEXT NOT NULL DEFAULT (datetime('now', 'localtime'))
 	);
 
 	CREATE INDEX IF NOT EXISTS idx_items_search ON items(search_text);
@@ -183,7 +183,7 @@ func runMigrations(db *sql.DB) error {
 
 	// 兼容迁移：旧数据库没有 updated_at 列
 	db.Exec("ALTER TABLE items ADD COLUMN updated_at TEXT NOT NULL DEFAULT ''")
-	db.Exec("UPDATE items SET updated_at = datetime('now') WHERE updated_at = ''")
+	db.Exec("UPDATE items SET updated_at = datetime('now', 'localtime') WHERE updated_at = ''")
 
 	// 兼容迁移：旧表 CHECK 不包含 archived → 重建表去掉约束（Go 端校验）
 	db.Exec(`

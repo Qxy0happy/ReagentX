@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS items (
     status TEXT NOT NULL DEFAULT 'On' CHECK (status IN ('On', 'Off')),
     image_path TEXT DEFAULT NULL,          -- 照片路径（可选）
     search_text TEXT NOT NULL DEFAULT '',   -- 合并关键词冗余字段（含标签）
-    updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    updated_at TEXT NOT NULL DEFAULT (datetime('now', 'localtime'))
 );
 
 -- 留言功能（类似闲鱼"我想要"）
