@@ -54,6 +54,11 @@ class _SearchScreenState extends State<SearchScreen> {
     if (mounted) setState(() => _loading = false);
   }
 
+  String _fmtTime(String s) {
+    if (s.length >= 16) return s.substring(0, 16);
+    return s;
+  }
+
   String _remainingLabel(String r) {
     switch (r) {
       case '多': return '多（>67%）';
@@ -230,6 +235,11 @@ class _SearchScreenState extends State<SearchScreen> {
                                           '${r['user_role'] == 'teacher' ? '（课题负责人）' : ''}',
                                           style: theme.textTheme.bodySmall,
                                         ),
+                                        if ((r['updated_at'] as String? ?? '').isNotEmpty)
+                                          Text(
+                                            _fmtTime(r['updated_at'] as String),
+                                            style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey, fontSize: 11),
+                                          ),
                                         const SizedBox(height: 2),
                                         Row(
                                           children: [

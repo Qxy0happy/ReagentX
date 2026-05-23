@@ -21,6 +21,7 @@ type searchResult struct {
 	Status     string
 	ImagePath  string
 	SearchText string
+	UpdatedAt  string
 	Brand      string
 	Size       string
 	Name       string
@@ -59,7 +60,7 @@ func SearchHandler(db *sql.DB, sd *dict.SearchDict) gin.HandlerFunc {
 		ftsQuery := strings.Join(ftsParts, " OR ")
 
 		query := `
-			SELECT i.id, i.location, i.remaining, i.status, i.image_path, i.search_text,
+			SELECT i.id, i.location, i.remaining, i.status, i.image_path, i.search_text, i.updated_at,
 			       s.brand, s.size,
 			       sp.name, sp.en_name, sp.tags,
 			       u.name, u.role, g.name, g.teacher
@@ -86,7 +87,7 @@ func SearchHandler(db *sql.DB, sd *dict.SearchDict) gin.HandlerFunc {
 		for rows.Next() {
 			var r searchResult
 			if err := rows.Scan(&r.ID, &r.Location, &r.Remaining,
-				&r.Status, &r.ImagePath, &r.SearchText, &r.Brand, &r.Size,
+				&r.Status, &r.ImagePath, &r.SearchText, &r.UpdatedAt, &r.Brand, &r.Size,
 				&r.Name, &r.EnName, &r.Tags,
 				&r.UserName, &r.UserRole, &r.GroupName, &r.Teacher); err != nil {
 				log.Printf("scan row failed: %v", err)
@@ -117,6 +118,7 @@ func SearchHandler(db *sql.DB, sd *dict.SearchDict) gin.HandlerFunc {
 			Status     string `json:"status"`
 			ImagePath  string `json:"image_path"`
 			SearchText string `json:"search_text"`
+			UpdatedAt  string `json:"updated_at"`
 			Brand      string `json:"brand"`
 			Size       string `json:"size"`
 			Name       string `json:"name"`
@@ -134,6 +136,7 @@ func SearchHandler(db *sql.DB, sd *dict.SearchDict) gin.HandlerFunc {
 			out[i] = ResultJSON{
 				ID: r.ID, Location: r.Location, Remaining: r.Remaining,
 				Status: r.Status, ImagePath: r.ImagePath, SearchText: r.SearchText,
+				UpdatedAt: r.UpdatedAt,
 				Brand: r.Brand, Size: r.Size,
 				Name: r.Name, EnName: r.EnName, Tags: r.Tags,
 				UserName: r.UserName, UserRole: r.UserRole,

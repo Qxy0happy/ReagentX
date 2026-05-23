@@ -124,7 +124,8 @@ func runMigrations(db *sql.DB) error {
 		remaining TEXT NOT NULL DEFAULT '多' CHECK (remaining IN ('多', '中', '少')),
 		status TEXT NOT NULL DEFAULT 'On' CHECK (status IN ('On', 'Off')),
 		image_path TEXT DEFAULT NULL,
-		search_text TEXT NOT NULL DEFAULT ''
+		search_text TEXT NOT NULL DEFAULT '',
+		updated_at TEXT NOT NULL DEFAULT (datetime('now'))
 	);
 
 	CREATE INDEX IF NOT EXISTS idx_items_search ON items(search_text);
@@ -179,6 +180,10 @@ func runMigrations(db *sql.DB) error {
 	// 兼容迁移：旧数据库没有 reply_text/replied_at 列
 	db.Exec("ALTER TABLE inquiries ADD COLUMN reply_text TEXT NOT NULL DEFAULT ''")
 	db.Exec("ALTER TABLE inquiries ADD COLUMN replied_at TEXT NOT NULL DEFAULT ''")
+
+	// 兼容迁移：旧数据库没有 updated_at 列
+	db.Exec("ALTER TABLE items ADD COLUMN updated_at TEXT NOT NULL DEFAULT ''")
+	db.Exec("UPDATE items SET updated_at = datetime('now') WHERE updated_at = ''")
 
 	// 兼容迁移：旧表 CHECK 不包含 archived → 重建表去掉约束（Go 端校验）
 	db.Exec(`

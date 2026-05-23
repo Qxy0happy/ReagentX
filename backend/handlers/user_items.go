@@ -14,7 +14,7 @@ func GetUserItemsHandler(db *sql.DB) gin.HandlerFunc {
 		userID := c.Param("id")
 
 		rows, err := db.Query(`
-			SELECT i.id, i.location, i.remaining, i.status, i.image_path,
+			SELECT i.id, i.location, i.remaining, i.status, i.image_path, i.updated_at,
 			       sp.name, sp.tags, s.brand, s.size
 			FROM items i
 			JOIN skus s ON i.sku_id = s.id
@@ -33,6 +33,7 @@ func GetUserItemsHandler(db *sql.DB) gin.HandlerFunc {
 			ID        int64  `json:"id"`
 			Location  string `json:"location"`
 			Remaining string `json:"remaining"`
+			UpdatedAt string `json:"updated_at"`
 			Status    string `json:"status"`
 			ImagePath string `json:"image_path"`
 			Name      string `json:"name"`
@@ -44,7 +45,7 @@ func GetUserItemsHandler(db *sql.DB) gin.HandlerFunc {
 		var items []Item
 		for rows.Next() {
 			var it Item
-			if err := rows.Scan(&it.ID, &it.Location, &it.Remaining, &it.Status, &it.ImagePath,
+			if err := rows.Scan(&it.ID, &it.Location, &it.Remaining, &it.Status, &it.ImagePath, &it.UpdatedAt,
 				&it.Name, &it.Tags, &it.Brand, &it.Size); err != nil {
 				log.Printf("scan failed: %v", err)
 				continue

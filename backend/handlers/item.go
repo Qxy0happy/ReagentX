@@ -202,8 +202,8 @@ func CreateItemHandler(db *sql.DB) gin.HandlerFunc {
 		// 5. 创建 Item
 		var itemID int64
 		err = tx.QueryRow(
-			`INSERT INTO items (sku_id, owner_user_id, location, remaining, image_path, search_text)
-			 VALUES (?, ?, ?, ?, ?, ?) RETURNING id`,
+			`INSERT INTO items (sku_id, owner_user_id, location, remaining, image_path, search_text, updated_at)
+			 VALUES (?, ?, ?, ?, ?, ?, datetime('now')) RETURNING id`,
 			skuID, ownerUserID, location, remaining, imagePath, searchText,
 		).Scan(&itemID)
 		if err != nil {
@@ -235,7 +235,7 @@ func GetGroupItemsHandler(db *sql.DB) gin.HandlerFunc {
 		groupID := c.Param("id")
 
 		rows, err := db.Query(`
-			SELECT i.id, i.location, i.remaining, i.status, i.image_path, i.search_text,
+			SELECT i.id, i.location, i.remaining, i.status, i.image_path, i.search_text, i.updated_at,
 			       sp.name, sp.tags,
 			       s.brand, s.size,
 			       u.name, u.role
@@ -258,6 +258,7 @@ func GetGroupItemsHandler(db *sql.DB) gin.HandlerFunc {
 			Location   string `json:"location"`
 			Remaining  string `json:"remaining"`
 			Status     string `json:"status"`
+			UpdatedAt  string `json:"updated_at"`
 			ImagePath  string `json:"image_path"`
 			SearchText string `json:"search_text"`
 			Name       string `json:"name"`
@@ -271,7 +272,7 @@ func GetGroupItemsHandler(db *sql.DB) gin.HandlerFunc {
 		var results []ItemResult
 		for rows.Next() {
 			var r ItemResult
-			if err := rows.Scan(&r.ID, &r.Location, &r.Remaining, &r.Status, &r.ImagePath, &r.SearchText,
+			if err := rows.Scan(&r.ID, &r.Location, &r.Remaining, &r.Status, &r.ImagePath, &r.SearchText, &r.UpdatedAt,
 				&r.Name, &r.Tags, &r.Brand, &r.Size,
 				&r.UserName, &r.UserRole); err != nil {
 				log.Printf("scan failed: %v", err)
@@ -306,7 +307,7 @@ func UpdateItemRemainingHandler(db *sql.DB) gin.HandlerFunc {
 			return
 		}
 
-		result, err := db.Exec(`UPDATE items SET remaining = ? WHERE id = ?`, req.Remaining, itemID)
+		result, err := db.Exec(`UPDATE items SET remaining = ?, updated_at = datetime('now') WHERE id = ?`, req.Remaining, itemID)
 		if err != nil {
 			log.Printf("update remaining failed: %v", err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "update failed"})
