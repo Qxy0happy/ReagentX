@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'config/api_config.dart';
 import 'providers/auth_provider.dart';
+import 'providers/inquiry_provider.dart';
 import 'screens/home_screen.dart';
 import 'screens/search_screen.dart';
 import 'screens/camera_screen.dart';
@@ -610,7 +611,8 @@ class _ProfilePageState extends State<_ProfilePage> {
       if (resp.statusCode == 200) {
         final body = jsonDecode(resp.body);
         _inquiries = (body['inquiries'] as List).cast<Map<String, dynamic>>();
-        if (mounted) setState(() {});
+        // 刷新 badge
+        if (mounted) context.read<InquiryProvider>().fetchPendingCount(auth.userId);
       }
     } catch (_) {}
   }

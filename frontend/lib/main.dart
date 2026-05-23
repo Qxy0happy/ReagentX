@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'app.dart';
 import 'providers/auth_provider.dart';
 import 'providers/camera_provider.dart';
+import 'providers/inquiry_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -11,11 +12,17 @@ void main() async {
   final auth = AuthProvider();
   await auth.loadSavedSession();
 
+  final inquiryProvider = InquiryProvider();
+  if (auth.isLoggedIn) {
+    await inquiryProvider.fetchPendingCount(auth.userId);
+  }
+
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider.value(value: auth),
         ChangeNotifierProvider(create: (_) => CameraProvider()),
+        ChangeNotifierProvider.value(value: inquiryProvider),
       ],
       child: const ReagentXApp(),
     ),
