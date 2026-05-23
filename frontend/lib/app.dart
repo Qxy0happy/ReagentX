@@ -14,71 +14,8 @@ import 'screens/camera_screen.dart';
 import 'screens/publish_screen.dart';
 import 'screens/login_screen.dart';
 
-class ReagentXApp extends StatefulWidget {
+class ReagentXApp extends StatelessWidget {
   const ReagentXApp({super.key});
-
-  @override
-  State<ReagentXApp> createState() => _ReagentXAppState();
-}
-
-class _ReagentXAppState extends State<ReagentXApp> {
-  @override
-  void initState() {
-    super.initState();
-    _checkUpdate();
-  }
-
-  Future<void> _checkUpdate() async {
-    // 延迟几秒等首页渲染，不阻塞启动
-    await Future.delayed(const Duration(seconds: 3));
-    if (!mounted) return;
-    final up = context.read<UpdateProvider>();
-    final hasUpdate = await up.checkForUpdate();
-    if (!mounted) return;
-    if (hasUpdate && up.latest != null) {
-      _showUpdateDialog(up.latest!);
-    }
-  }
-
-  void _showUpdateDialog(UpdateInfo upd) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Row(
-          children: [
-            const Icon(Icons.system_update, size: 20),
-            const SizedBox(width: 8),
-            Text('发现新版本 ${upd.version}'),
-          ],
-        ),
-        content: SingleChildScrollView(
-          child: Text(upd.releaseNotes),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('稍后再说'),
-          ),
-          FilledButton.icon(
-            onPressed: () async {
-              // 根据平台选择下载
-              final platform = _detectPlatform();
-              final up = context.read<UpdateProvider>();
-              await up.download(platform);
-              if (ctx.mounted) Navigator.pop(ctx);
-            },
-            icon: const Icon(Icons.download, size: 18),
-            label: const Text('立即更新'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  String _detectPlatform() {
-    // 简单按平台区分下载
-    return 'android'; // 默认安卓 APK
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -660,7 +597,90 @@ class _ProfilePageState extends State<_ProfilePage> {
                 )),
 
           const SizedBox(height: 16),
+          _buildUpdateSection(),
+          const SizedBox(height: 16),
           _buildInquiriesSection(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildUpdateSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('关于', style: Theme.of(context).textTheme.titleMedium),
+        const SizedBox(height: 8),
+        Card(
+          child: ListTile(
+            leading: Icon(Icons.info_outline, color: Theme.of(context).colorScheme.primary),
+            title: const Text('ReagentX'),
+            subtitle: const Text('课题组试剂管理平台'),
+            trailing: Text('v1.0.0', style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey)),
+          ),
+        ),
+        const SizedBox(height: 8),
+        OutlinedButton.icon(
+          onPressed: () async {
+            final up = context.read<UpdateProvider>();
+            final scaffold = ScaffoldMessenger.of(context);
+            if (up.checking) return;
+
+            scaffold.showSnackBar(
+              const SnackBar(content: Text('正在检查更新…'), duration: Duration(seconds: 1)),
+            );
+
+            final hasUpdate = await up.checkForUpdate();
+
+            if (!mounted) return;
+
+            if (hasUpdate && up.latest != null) {
+              _showUpdateDialog(up.latest!);
+            } else if (up.error != null) {
+              scaffold.showSnackBar(
+                SnackBar(content: Text('检查失败: ${up.error}')),
+              );
+            } else {
+              scaffold.showSnackBar(
+                const SnackBar(content: Text('已是最新版本')),
+              );
+            }
+          },
+          icon: const Icon(Icons.system_update_outlined, size: 18),
+          label: const Text('检查更新'),
+        ),
+      ],
+    );
+  }
+
+  void _showUpdateDialog(UpdateInfo upd) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Row(
+          children: [
+            const Icon(Icons.system_update, size: 20),
+            const SizedBox(width: 8),
+            Text('发现新版本 ${upd.version}'),
+          ],
+        ),
+        content: SingleChildScrollView(
+          child: Text(upd.releaseNotes),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('稍后再说'),
+          ),
+          FilledButton.icon(
+            onPressed: () async {
+              final up = context.read<UpdateProvider>();
+              await up.download('android');
+              if (ctx.mounted) Navigator.pop(ctx);
+            },
+            icon: const Icon(Icons.download, size: 18),
+            label: const Text('立即更新'),
+          ),
         ],
       ),
     );
