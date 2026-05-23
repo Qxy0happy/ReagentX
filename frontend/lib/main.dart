@@ -4,6 +4,7 @@ import 'app.dart';
 import 'providers/auth_provider.dart';
 import 'providers/camera_provider.dart';
 import 'providers/inquiry_provider.dart';
+import 'providers/update_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -23,6 +24,7 @@ void main() async {
         ChangeNotifierProvider.value(value: auth),
         ChangeNotifierProvider(create: (_) => CameraProvider()),
         ChangeNotifierProvider.value(value: inquiryProvider),
+        ChangeNotifierProvider(create: (_) => UpdateProvider()),
       ],
       child: const ReagentXApp(),
     ),

@@ -7,14 +7,78 @@ import 'package:provider/provider.dart';
 import 'config/api_config.dart';
 import 'providers/auth_provider.dart';
 import 'providers/inquiry_provider.dart';
+import 'providers/update_provider.dart';
 import 'screens/home_screen.dart';
 import 'screens/search_screen.dart';
 import 'screens/camera_screen.dart';
 import 'screens/publish_screen.dart';
 import 'screens/login_screen.dart';
 
-class ReagentXApp extends StatelessWidget {
+class ReagentXApp extends StatefulWidget {
   const ReagentXApp({super.key});
+
+  @override
+  State<ReagentXApp> createState() => _ReagentXAppState();
+}
+
+class _ReagentXAppState extends State<ReagentXApp> {
+  @override
+  void initState() {
+    super.initState();
+    _checkUpdate();
+  }
+
+  Future<void> _checkUpdate() async {
+    // 延迟几秒等首页渲染，不阻塞启动
+    await Future.delayed(const Duration(seconds: 3));
+    if (!mounted) return;
+    final up = context.read<UpdateProvider>();
+    final hasUpdate = await up.checkForUpdate();
+    if (!mounted) return;
+    if (hasUpdate && up.latest != null) {
+      _showUpdateDialog(up.latest!);
+    }
+  }
+
+  void _showUpdateDialog(UpdateInfo upd) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Row(
+          children: [
+            const Icon(Icons.system_update, size: 20),
+            const SizedBox(width: 8),
+            Text('发现新版本 ${upd.version}'),
+          ],
+        ),
+        content: SingleChildScrollView(
+          child: Text(upd.releaseNotes),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('稍后再说'),
+          ),
+          FilledButton.icon(
+            onPressed: () async {
+              // 根据平台选择下载
+              final platform = _detectPlatform();
+              final up = context.read<UpdateProvider>();
+              await up.download(platform);
+              if (ctx.mounted) Navigator.pop(ctx);
+            },
+            icon: const Icon(Icons.download, size: 18),
+            label: const Text('立即更新'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _detectPlatform() {
+    // 简单按平台区分下载
+    return 'android'; // 默认安卓 APK
+  }
 
   @override
   Widget build(BuildContext context) {
