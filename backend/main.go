@@ -137,7 +137,7 @@ func runMigrations(db *sql.DB) error {
 		message TEXT NOT NULL DEFAULT '',
 		reply_text TEXT NOT NULL DEFAULT '',
 		replied_at TEXT NOT NULL DEFAULT '',
-		status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending','accepted','rejected','archived')),
+		status TEXT NOT NULL DEFAULT 'pending',
 		created_at TEXT NOT NULL DEFAULT (datetime('now'))
 	);
 
@@ -179,6 +179,34 @@ func runMigrations(db *sql.DB) error {
 	// 兼容迁移：旧数据库没有 reply_text/replied_at 列
 	db.Exec("ALTER TABLE inquiries ADD COLUMN reply_text TEXT NOT NULL DEFAULT ''")
 	db.Exec("ALTER TABLE inquiries ADD COLUMN replied_at TEXT NOT NULL DEFAULT ''")
+
+	// 兼容迁移：旧表 CHECK 不包含 archived → 重建表去掉约束（Go 端校验）
+	db.Exec(`
+		CREATE TABLE IF NOT EXISTS inquiries_new (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			item_id INTEGER NOT NULL REFERENCES items(id) ON DELETE CASCADE,
+			from_user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+			from_user_name TEXT NOT NULL DEFAULT '',
+			message TEXT NOT NULL DEFAULT '',
+			reply_text TEXT NOT NULL DEFAULT '',
+			replied_at TEXT NOT NULL DEFAULT '',
+			status TEXT NOT NULL DEFAULT 'pending',
+			created_at TEXT NOT NULL DEFAULT (datetime('now'))
+		)
+	`)
+	db.Exec(`
+		INSERT OR IGNORE INTO inquiries_new
+			(id, item_id, from_user_id, from_user_name, message,
+			 reply_text, replied_at, status, created_at)
+		SELECT
+			id, item_id, from_user_id, from_user_name, message,
+			reply_text, replied_at, status, created_at
+		FROM inquiries
+	`)
+	db.Exec("DROP TABLE inquiries")
+	db.Exec("ALTER TABLE inquiries_new RENAME TO inquiries")
+	db.Exec("CREATE INDEX IF NOT EXISTS idx_inquiries_item ON inquiries(item_id)")
+	db.Exec("CREATE INDEX IF NOT EXISTS idx_inquiries_sender ON inquiries(from_user_id)")
 
 	return nil
 }

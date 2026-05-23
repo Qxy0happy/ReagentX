@@ -51,7 +51,7 @@ CREATE TABLE IF NOT EXISTS inquiries (
     from_user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     from_user_name TEXT NOT NULL DEFAULT '',
     message TEXT NOT NULL DEFAULT '',
-    status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending','accepted','rejected','archived')),
+    status TEXT NOT NULL DEFAULT 'pending',
     reply_text TEXT NOT NULL DEFAULT '',
     replied_at TEXT NOT NULL DEFAULT '',
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
