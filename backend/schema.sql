@@ -44,6 +44,20 @@ CREATE TABLE IF NOT EXISTS items (
     search_text TEXT NOT NULL DEFAULT ''   -- 合并关键词冗余字段（含标签）
 );
 
+-- 留言功能（类似闲鱼"我想要"）
+CREATE TABLE IF NOT EXISTS inquiries (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    item_id INTEGER NOT NULL REFERENCES items(id) ON DELETE CASCADE,
+    from_user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    from_user_name TEXT NOT NULL DEFAULT '',
+    message TEXT NOT NULL DEFAULT '',
+    status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending','accepted','rejected')),
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_inquiries_item ON inquiries(item_id);
+CREATE INDEX IF NOT EXISTS idx_inquiries_sender ON inquiries(from_user_id);
+
 CREATE INDEX IF NOT EXISTS idx_items_search ON items(search_text);
 CREATE INDEX IF NOT EXISTS idx_items_owner ON items(owner_user_id);
 CREATE INDEX IF NOT EXISTS idx_spus_name ON spus(name);

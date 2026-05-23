@@ -3,7 +3,9 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 import '../config/api_config.dart';
+import '../providers/auth_provider.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -58,6 +60,72 @@ class _SearchScreenState extends State<SearchScreen> {
       case '中': return '中（50%~90%）';
       case '少': return '少（<50%）';
       default: return r;
+    }
+  }
+
+  Future<void> _showInquireDialog(BuildContext context, Map<String, dynamic> item) async {
+    final auth = context.read<AuthProvider>();
+    if (!auth.isLoggedIn) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('请先登录后再留言')),
+      );
+      return;
+    }
+
+    final msgCtrl = TextEditingController();
+    final msg = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('${item['name']}'),
+        content: TextField(
+          controller: msgCtrl,
+          autofocus: true,
+          maxLines: 3,
+          decoration: const InputDecoration(
+            hintText: '说点什么…（选填）',
+            border: OutlineInputBorder(),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('取消'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, msgCtrl.text.trim()),
+            child: const Text('发送'),
+          ),
+        ],
+      ),
+    );
+
+    if (msg == null) return;
+
+    try {
+      final resp = await http.post(
+        ApiConfig.uri('/api/v1/items/${item['id']}/inquire?user_id=${auth.userId}'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'message': msg}),
+      );
+      if (resp.statusCode == 201) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('已发送留言，等待回复')),
+          );
+        }
+      } else {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('发送失败')),
+          );
+        }
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('网络错误: $e')),
+        );
+      }
     }
   }
 
@@ -129,49 +197,75 @@ class _SearchScreenState extends State<SearchScreen> {
                               ? ApiConfig.url('/$imagePath')
                               : null;
 
-                          return ListTile(
-                            leading: imageUrl != null
-                                ? ClipRRect(
-                                    borderRadius: BorderRadius.circular(8),
-                                    child: Image.network(
-                                      imageUrl,
-                                      width: 56,
-                                      height: 56,
-                                      fit: BoxFit.cover,
-                                      errorBuilder: (_, _, _) => _defaultIcon(theme),
+                          return Card(
+                            margin: const EdgeInsets.symmetric(vertical: 4),
+                            child: Padding(
+                              padding: const EdgeInsets.all(12),
+                              child: Row(
+                                children: [
+                                  // 图片
+                                  imageUrl != null
+                                      ? ClipRRect(
+                                          borderRadius: BorderRadius.circular(8),
+                                          child: Image.network(
+                                            imageUrl,
+                                            width: 52,
+                                            height: 52,
+                                            fit: BoxFit.cover,
+                                            errorBuilder: (_, _, _) => _defaultIcon(theme),
+                                          ),
+                                        )
+                                      : _defaultIcon(theme),
+                                  const SizedBox(width: 12),
+                                  // 文字信息
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(r['name'] as String? ?? '',
+                                          style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w500)),
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          '${r['group_name'] ?? ''} · ${r['user_name'] ?? ''}'
+                                          '${r['user_role'] == 'teacher' ? '（教师）' : ''}',
+                                          style: theme.textTheme.bodySmall,
+                                        ),
+                                        const SizedBox(height: 2),
+                                        Row(
+                                          children: [
+                                            Text(
+                                              _remainingLabel(r['remaining'] as String? ?? ''),
+                                              style: theme.textTheme.bodySmall?.copyWith(
+                                                color: r['remaining'] == '多'
+                                                    ? Colors.green
+                                                    : r['remaining'] == '中'
+                                                        ? Colors.orange
+                                                        : Colors.red,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 8),
+                                            Text(
+                                              () { final s = r['size'] as String?; return (s == null || s.isEmpty) ? '' : s; }(),
+                                              style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
                                     ),
-                                  )
-                                : _defaultIcon(theme),
-                            title: Text(r['name'] as String? ?? ''),
-                            subtitle: Text(
-                              '${r['group_name'] ?? ''} · ${r['user_name'] ?? ''}'
-                              '${r['user_role'] == 'teacher' ? '（教师）' : ''}',
-                              style: theme.textTheme.bodySmall,
-                            ),
-                            trailing: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.end,
-                                  children: [
-                                    Text(
-                                      _remainingLabel(r['remaining'] as String? ?? ''),
-                                      style: theme.textTheme.bodyMedium?.copyWith(
-                                        color: r['remaining'] == '多'
-                                            ? Colors.green
-                                            : r['remaining'] == '中'
-                                                ? Colors.orange
-                                                : Colors.red,
-                                      ),
+                                  ),
+                                  // 我想要按钮
+                                  FilledButton.tonalIcon(
+                                    onPressed: () => _showInquireDialog(context, r),
+                                    icon: const Icon(Icons.favorite_border, size: 16),
+                                    label: const Text('我想要', style: TextStyle(fontSize: 12)),
+                                    style: FilledButton.styleFrom(
+                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                      minimumSize: Size.zero,
+                                      visualDensity: VisualDensity.compact,
                                     ),
-                                    Text(
-                                      () { final s = r['size'] as String?; return (s == null || s.isEmpty) ? '0' : s; }(),
-                                      style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey),
-                                    ),
-                                  ],
-                                ),
-                              ],
+                                  ),
+                                ],
+                              ),
                             ),
                           );
                         },

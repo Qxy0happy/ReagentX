@@ -118,12 +118,14 @@ class _ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<_ProfilePage> {
   List<Map<String, dynamic>>? _items;
   List<Map<String, dynamic>>? _members;
+  List<Map<String, dynamic>> _inquiries = [];
   bool _loading = false;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     _loadAll();
+    _loadInquiries();
   }
 
   Future<void> _loadAll() async {
@@ -590,9 +592,136 @@ class _ProfilePageState extends State<_ProfilePage> {
                     ),
                   ),
                 )),
+
+          const SizedBox(height: 16),
+          _buildInquiriesSection(),
         ],
       ),
     );
+  }
+
+  Future<void> _loadInquiries() async {
+    final auth = context.read<AuthProvider>();
+    if (auth.userId == null) return;
+    try {
+      final resp = await http.get(
+        ApiConfig.uri('/api/v1/users/${auth.userId}/inquiries'),
+      );
+      if (resp.statusCode == 200) {
+        final body = jsonDecode(resp.body);
+        _inquiries = (body['inquiries'] as List).cast<Map<String, dynamic>>();
+        if (mounted) setState(() {});
+      }
+    } catch (_) {}
+  }
+
+  Widget _buildInquiriesSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('留言箱', style: Theme.of(context).textTheme.titleMedium),
+        const SizedBox(height: 8),
+        if (_inquiries.isEmpty)
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 16),
+            child: Center(child: Text('暂无留言', style: TextStyle(color: Colors.grey))),
+          )
+        else
+          ..._inquiries.map((inq) => Card(
+            margin: const EdgeInsets.only(bottom: 8),
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.message_outlined, size: 16, color: Theme.of(context).colorScheme.primary),
+                      const SizedBox(width: 6),
+                      Text(inq['item_name'] as String? ?? '', style: Theme.of(context).textTheme.titleSmall),
+                      const Spacer(),
+                      Text(inq['created_at'] as String? ?? '', style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey, fontSize: 11)),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Row(
+                    children: [
+                      Text(inq['from_user_name'] as String? ?? '', style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w500)),
+                      const SizedBox(width: 4),
+                      Text('留言', style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey)),
+                    ],
+                  ),
+                  if ((inq['message'] as String? ?? '').isNotEmpty) ...[
+                    const SizedBox(height: 4),
+                    Text(inq['message'] as String? ?? '', style: Theme.of(context).textTheme.bodyMedium),
+                  ],
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      _statusChip(inq['status'] as String? ?? ''),
+                      const Spacer(),
+                      if (inq['status'] == 'pending')
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            FilledButton.tonalIcon(
+                              onPressed: () => _updateInquiryStatus(inq['id'] as int, 'accepted'),
+                              icon: const Icon(Icons.check, size: 14),
+                              label: const Text('已联系', style: TextStyle(fontSize: 12)),
+                              style: FilledButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                minimumSize: Size.zero,
+                                visualDensity: VisualDensity.compact,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            OutlinedButton.icon(
+                              onPressed: () => _updateInquiryStatus(inq['id'] as int, 'rejected'),
+                              icon: const Icon(Icons.close, size: 14),
+                              label: const Text('婉拒', style: TextStyle(fontSize: 12)),
+                              style: OutlinedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                minimumSize: Size.zero,
+                                visualDensity: VisualDensity.compact,
+                              ),
+                            ),
+                          ],
+                        ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          )),
+      ],
+    );
+  }
+
+  Widget _statusChip(String status) {
+    final (label, color) = switch (status) {
+      'accepted' => ('已联系', Colors.green),
+      'rejected' => ('已婉拒', Colors.grey),
+      _ => ('待处理', Colors.orange),
+    };
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(label, style: TextStyle(fontSize: 11, color: color, fontWeight: FontWeight.w500)),
+    );
+  }
+
+  Future<void> _updateInquiryStatus(int id, String status) async {
+    try {
+      await http.patch(
+        ApiConfig.uri('/api/v1/inquiries/$id'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'status': status}),
+      );
+      _loadInquiries();
+    } catch (_) {}
   }
 }
 

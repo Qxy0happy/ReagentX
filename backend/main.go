@@ -61,6 +61,11 @@ func main() {
 		api.PUT("/users/:userId/password", handlers.UpdatePasswordHandler(db))
 		api.GET("/groups/:id/items", handlers.GetGroupItemsHandler(db))
 		api.GET("/users/:id/items", handlers.GetUserItemsHandler(db))
+		// 留言
+		api.POST("/items/:id/inquire", handlers.CreateInquiryHandler(db))
+		api.GET("/users/:id/inquiries", handlers.ListInquiriesHandler(db))
+		api.PATCH("/inquiries/:id", handlers.UpdateInquiryHandler(db))
+
 		// 发布
 		api.POST("/items", handlers.CreateItemHandler(db))
 		api.DELETE("/items/:id", handlers.DeleteItemHandler(db))
@@ -121,6 +126,19 @@ func runMigrations(db *sql.DB) error {
 	);
 
 	CREATE INDEX IF NOT EXISTS idx_items_search ON items(search_text);
+
+	CREATE TABLE IF NOT EXISTS inquiries (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		item_id INTEGER NOT NULL REFERENCES items(id) ON DELETE CASCADE,
+		from_user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+		from_user_name TEXT NOT NULL DEFAULT '',
+		message TEXT NOT NULL DEFAULT '',
+		status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending','accepted','rejected')),
+		created_at TEXT NOT NULL DEFAULT (datetime('now'))
+	);
+
+	CREATE INDEX IF NOT EXISTS idx_inquiries_item ON inquiries(item_id);
+	CREATE INDEX IF NOT EXISTS idx_inquiries_sender ON inquiries(from_user_id);
 	CREATE INDEX IF NOT EXISTS idx_items_owner ON items(owner_user_id);
 	CREATE INDEX IF NOT EXISTS idx_spus_name ON spus(name);
 	CREATE INDEX IF NOT EXISTS idx_skus_spu ON skus(spu_id);
