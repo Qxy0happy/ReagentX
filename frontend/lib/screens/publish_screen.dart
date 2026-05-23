@@ -121,7 +121,7 @@ class _PublishScreenState extends State<PublishScreen> {
                     const SizedBox(width: 8),
                     Consumer<AuthProvider>(
                       builder: (_, auth, _) => Text(
-                        '${auth.groupName} · ${auth.userName}${auth.userRole == 'teacher' ? '（教师）' : ''}',
+                        '${auth.groupName} · ${auth.userName}${auth.userRole == 'teacher' ? '（课题负责人）' : ''}',
                         style: Theme.of(context).textTheme.bodyMedium,
                       ),
                     ),

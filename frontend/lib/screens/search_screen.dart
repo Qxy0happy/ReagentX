@@ -227,7 +227,7 @@ class _SearchScreenState extends State<SearchScreen> {
                                         const SizedBox(height: 2),
                                         Text(
                                           '${r['group_name'] ?? ''} · ${r['user_name'] ?? ''}'
-                                          '${r['user_role'] == 'teacher' ? '（教师）' : ''}',
+                                          '${r['user_role'] == 'teacher' ? '（课题负责人）' : ''}',
                                           style: theme.textTheme.bodySmall,
                                         ),
                                         const SizedBox(height: 2),

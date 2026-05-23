@@ -412,7 +412,7 @@ class _ProfilePageState extends State<_ProfilePage> {
               controller: pwdCtrl,
               obscureText: true,
               decoration: const InputDecoration(
-                hintText: '设置密码（留空同教师密码）',
+                hintText: '设置密码（留空同负责人密码）',
                 border: OutlineInputBorder(),
               ),
             ),
@@ -556,7 +556,7 @@ class _ProfilePageState extends State<_ProfilePage> {
                 value: _newRole,
                 decoration: const InputDecoration(labelText: '角色 *', border: OutlineInputBorder()),
                 items: const [
-                  DropdownMenuItem(value: 'teacher', child: Text('教师 👑')),
+                  DropdownMenuItem(value: 'teacher', child: Text('课题负责人 👑')),
                   DropdownMenuItem(value: 'member', child: Text('成员')),
                 ],
                 onChanged: (v) => setState(() => _newRole = v!),
@@ -670,7 +670,7 @@ class _ProfilePageState extends State<_ProfilePage> {
                 Text(auth.groupName ?? '', style: Theme.of(context).textTheme.bodyLarge),
                 const SizedBox(height: 4),
                 Chip(
-                  label: Text(auth.userRole == 'teacher' ? '教师 👑' : '成员'),
+                  label: Text(auth.userRole == 'teacher' ? '课题负责人 👑' : '成员'),
                   visualDensity: VisualDensity.compact,
                 ),
                 if (auth.teacher != null && auth.teacher!.isNotEmpty) ...[
@@ -742,7 +742,7 @@ class _ProfilePageState extends State<_ProfilePage> {
                   size: 20,
                 ),
                 title: Text(m['name'] as String? ?? ''),
-                subtitle: Text(m['role'] == 'teacher' ? '教师' : '成员',
+                subtitle: Text(m['role'] == 'teacher' ? '课题负责人' : '成员',
                   style: Theme.of(context).textTheme.bodySmall),
                 trailing: m['role'] != 'teacher'
                     ? Row(
