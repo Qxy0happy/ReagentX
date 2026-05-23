@@ -700,6 +700,7 @@ class _ProfilePageState extends State<_ProfilePage> {
       if (resp.statusCode == 200) {
         final body = jsonDecode(resp.body);
         _myInquiries = (body['inquiries'] as List).cast<Map<String, dynamic>>();
+        if (mounted) setState(() {});
       }
     } catch (_) {}
   }
@@ -787,7 +788,10 @@ class _ProfilePageState extends State<_ProfilePage> {
         final body = jsonDecode(resp.body);
         _inquiries = (body['inquiries'] as List).cast<Map<String, dynamic>>();
         // 刷新 badge
-        if (mounted) context.read<InquiryProvider>().fetchPendingCount(auth.userId);
+        if (mounted) {
+          context.read<InquiryProvider>().fetchPendingCount(auth.userId);
+          setState(() {});
+        }
       }
     } catch (_) {}
   }
