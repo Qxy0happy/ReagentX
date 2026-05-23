@@ -1,9 +1,9 @@
 {
-  "version": "v0.1.7",
-  "release_notes": "- 修复 setState during build 错误\n- baseUrl 改为编译期 dart-define 配置\n- 增加校园网接入指南\n- 新增留言（我想要）功能\n- 留言归档",
+  "version": "v0.1.9",
+  "release_notes": "- 留言回复功能（反留言）+ 我的留言\n- 检查更新功能（设置 → 检查更新）\n- 登录移入「我的」页面\n- 试剂增加统一时间戳\n- 修复若干 bug",
   "downloads": {
-    "android": "https://github.com/Qxy0happy/ReagentX/releases/download/v0.1.7/ReagentX-app-android.apk",
-    "windows": "https://github.com/Qxy0happy/ReagentX/releases/download/v0.1.7/ReagentX-server-windows-amd64.zip",
-    "linux": "https://github.com/Qxy0happy/ReagentX/releases/download/v0.1.7/ReagentX-server-linux-amd64.tar.gz"
+    "android": "https://github.com/Qxy0happy/ReagentX/releases/download/v0.1.9/ReagentX-app-android.apk",
+    "windows": "https://github.com/Qxy0happy/ReagentX/releases/download/v0.1.9/ReagentX-server-windows-amd64.zip",
+    "linux": "https://github.com/Qxy0happy/ReagentX/releases/download/v0.1.9/ReagentX-server-linux-amd64.tar.gz"
   }
 }
