@@ -16,11 +16,13 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _refreshBadge();
+    // 延后到下一帧，避免在 build 中触发 notifyListeners
+    WidgetsBinding.instance.addPostFrameCallback((_) => _refreshBadge());
   }
 
   void _refreshBadge() {
     final auth = context.read<AuthProvider>();
+    if (!mounted) return;
     if (auth.isLoggedIn) {
       context.read<InquiryProvider>().fetchPendingCount(auth.userId);
     } else {
