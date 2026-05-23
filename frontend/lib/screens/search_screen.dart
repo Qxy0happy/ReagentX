@@ -56,9 +56,9 @@ class _SearchScreenState extends State<SearchScreen> {
 
   String _remainingLabel(String r) {
     switch (r) {
-      case '多': return '多（>90%）';
-      case '中': return '中（50%~90%）';
-      case '少': return '少（<50%）';
+      case '多': return '多（>67%）';
+      case '中': return '中（33%~67%）';
+      case '少': return '少（<33%）';
       default: return r;
     }
   }

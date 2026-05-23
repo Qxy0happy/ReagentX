@@ -235,9 +235,9 @@ class _PublishScreenState extends State<PublishScreen> {
                 border: OutlineInputBorder(),
               ),
               items: const [
-                DropdownMenuItem(value: '多', child: Text('多（>90%）')),
-                DropdownMenuItem(value: '中', child: Text('中（50%~90%）')),
-                DropdownMenuItem(value: '少', child: Text('少（<50%）')),
+                DropdownMenuItem(value: '多', child: Text('多（>67%）')),
+                DropdownMenuItem(value: '中', child: Text('中（33%~67%）')),
+                DropdownMenuItem(value: '少', child: Text('少（<33%）')),
               ],
               onChanged: (v) => setState(() => _remaining = v!),
             ),

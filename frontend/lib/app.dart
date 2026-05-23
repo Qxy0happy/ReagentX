@@ -291,9 +291,9 @@ class _ProfilePageState extends State<_ProfilePage> {
   }
 
   String _remainingLabel(String r) {
-    if (r == '多') return '多（>90%）';
-    if (r == '中') return '中（50%~90%）';
-    return '少（<50%）';
+    if (r == '多') return '多（>67%）';
+    if (r == '中') return '中（33%~67%）';
+    return '少（<33%）';
   }
 
   String _sizeText(String? s) => (s == null || s.isEmpty) ? '0' : s;
