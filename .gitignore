@@ -1,0 +1,55 @@
+# Reasonix / AI agent skills cache
+.agents/
+.claude/
+skills-lock.json
+REASONIX.md
+
+# dependencies (bun install)
+node_modules
+
+# output
+out
+dist
+*.tgz
+
+# code coverage
+coverage
+*.lcov
+
+# logs
+logs
+_.log
+report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
+
+# dotenv environment variable files
+.env
+.env.development.local
+.env.test.local
+.env.production.local
+.env.local
+
+# caches
+.eslintcache
+.cache
+*.tsbuildinfo
+
+# IntelliJ based IDEs
+.idea
+
+# Flutter
+.dart_tool/
+.packages
+*.flutter-plugins
+*.flutter-plugins-dependencies
+*.log
+
+# database (auto-created at runtime)
+backend/reagent-x.db
+backend/reagent-x.db-wal
+backend/reagent-x.db-shm
+
+# uploads (auto-created)
+backend/uploads/
+
+# Finder (MacOS) folder config
+.DS_Store
