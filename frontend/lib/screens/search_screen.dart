@@ -237,7 +237,7 @@ class _SearchScreenState extends State<SearchScreen> {
                                         ),
                                         if ((r['updated_at'] as String? ?? '').isNotEmpty)
                                           Text(
-                                            _fmtTime(r['updated_at'] as String),
+                                            '上次更新：${_fmtTime(r['updated_at'] as String)}',
                                             style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey, fontSize: 11),
                                           ),
                                         const SizedBox(height: 2),
