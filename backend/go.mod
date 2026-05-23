@@ -1,4 +1,4 @@
-module reagent-x
+module reagentx
 
 go 1.25.0
 

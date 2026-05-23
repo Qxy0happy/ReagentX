@@ -17,7 +17,7 @@ class ReagentXApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
-      title: 'Reagent-X',
+      title: 'ReagentX',
       debugShowCheckedModeBanner: false,
       routerConfig: _router,
       theme: ThemeData(

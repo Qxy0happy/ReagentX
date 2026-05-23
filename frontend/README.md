@@ -1,4 +1,4 @@
-# Reagent-X 前端
+# ReagentX 前端
 
 Flutter 移动端 — Go 后端配套客户端。
 

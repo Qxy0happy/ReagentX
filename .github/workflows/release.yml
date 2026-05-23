@@ -25,13 +25,13 @@ jobs:
         working-directory: backend
         run: |
           GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} CGO_ENABLED=0 \
-            go build -ldflags="-s -w" -o reagent-x-server .
+            go build -ldflags="-s -w" -o reagentx-server .
 
       - name: Upload
         uses: actions/upload-artifact@v4
         with:
-          name: reagent-x-server-${{ matrix.goos }}-${{ matrix.goarch }}
-          path: backend/reagent-x-server${{ matrix.goos == 'windows' && '.exe' || '' }}
+          name: reagentx-server-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: backend/reagentx-server${{ matrix.goos == 'windows' && '.exe' || '' }}
 
   frontend:
     name: Build frontend (Android APK)
@@ -60,7 +60,7 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: reagent-x-app-android
+          name: reagentx-app-android
           path: frontend/build/app/outputs/flutter-apk/*.apk
 
   release:
@@ -75,9 +75,9 @@ jobs:
       - name: Pack
         run: |
           mkdir dist
-          cd reagent-x-server-linux-amd64 && tar czf ../dist/reagent-x-server-linux-amd64.tar.gz * && cd ..
-          cd reagent-x-server-windows-amd64 && zip -r ../dist/reagent-x-server-windows-amd64.zip * && cd ..
-          cd reagent-x-app-android && cp *.apk ../dist/ && cd ..
+          cd reagentx-server-linux-amd64 && tar czf ../dist/reagentx-server-linux-amd64.tar.gz * && cd ..
+          cd reagentx-server-windows-amd64 && zip -r ../dist/reagentx-server-windows-amd64.zip * && cd ..
+          cd reagentx-app-android && cp *.apk ../dist/ && cd ..
 
       - uses: softprops/action-gh-release@v2
         with:

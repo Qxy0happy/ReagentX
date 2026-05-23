@@ -10,7 +10,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"reagent-x/dict"
+	"reagentx/dict"
 )
 
 // searchResult 搜索结果的中间表示（含原始字段和分数）

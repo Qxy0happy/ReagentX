@@ -1,4 +1,4 @@
-# Reagent‑X（试剂闲鱼）
+# ReagentX（试剂闲鱼）
 
 去中心化的高校实验室闲置化学有机试剂共享/搜索平台。
 
@@ -27,7 +27,7 @@ graph TB
     end
 
     subgraph storage["持久化"]
-        SQLite[("SQLite<br/>reagent-x.db<br/>+ FTS5 全文索引")]
+        SQLite[("SQLite<br/>reagentx.db<br/>+ FTS5 全文索引")]
     end
 
     Search -->|"GET /api/v1/search?q="| Gin

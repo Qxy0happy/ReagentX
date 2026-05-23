@@ -1,4 +1,4 @@
-# Reagent-X 后端
+# ReagentX 后端
 
 Go API 服务 — 试剂闲鱼搜索平台后端。
 

@@ -1,4 +1,4 @@
-# Reagent-X 项目记忆
+# ReagentX 项目记忆
 
 ## 技术栈（实际）
 - **数据库**：SQLite（`modernc.org/sqlite`，纯 Go 无 cgo）

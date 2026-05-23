@@ -185,7 +185,7 @@ class _LoginScreenState extends State<LoginScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('Reagent‑X', style: Theme.of(context).textTheme.headlineMedium),
+            Text('ReagentX', style: Theme.of(context).textTheme.headlineMedium),
             const SizedBox(height: 8),
             Text('试剂闲鱼', style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Colors.grey)),
             const SizedBox(height: 48),

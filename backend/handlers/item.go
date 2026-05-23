@@ -17,8 +17,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 
-	"reagent-x/dict"
-	"reagent-x/expand"
+	"reagentx/dict"
+	"reagentx/expand"
 )
 
 const uploadDir = "uploads"

@@ -44,9 +44,9 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 *.log
 
 # database (auto-created at runtime)
-backend/reagent-x.db
-backend/reagent-x.db-wal
-backend/reagent-x.db-shm
+backend/reagentx.db
+backend/reagentx.db-wal
+backend/reagentx.db-shm
 
 # uploads (auto-created)
 backend/uploads/

@@ -1,4 +1,4 @@
--- Reagent-X Schema (SQLite)
+-- ReagentX Schema (SQLite)
 -- 语义标签为核心搜索维度，CAS 仅为辅助字段
 
 CREATE TABLE IF NOT EXISTS spus (

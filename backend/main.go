@@ -8,15 +8,15 @@ import (
 	"github.com/gin-gonic/gin"
 	_ "modernc.org/sqlite"
 
-	"reagent-x/dict"
-	"reagent-x/handlers"
+	"reagentx/dict"
+	"reagentx/handlers"
 )
 
 func main() {
 	// 数据库路径，默认 reagent-x.db
 	dbPath := os.Getenv("DB_PATH")
 	if dbPath == "" {
-		dbPath = "reagent-x.db"
+		dbPath = "reagentx.db"
 	}
 
 	db, err := sql.Open("sqlite", dbPath+"?_pragma=journal_mode(WAL)&_pragma=foreign_keys(ON)")

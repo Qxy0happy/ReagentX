@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>NSCameraUsageDescription</key>
-	<string>Reagent-X 需要相机权限来拍摄试剂标签以快速发布</string>
+	<string>ReagentX 需要相机权限来拍摄试剂标签以快速发布</string>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
