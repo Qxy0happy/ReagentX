@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.reagentx" "\0"
-            VALUE "FileDescription", "reagent_x" "\0"
+            VALUE "FileDescription", "ReagentX" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "reagent_x" "\0"
+            VALUE "InternalName", "ReagentX" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2026 com.reagentx. All rights reserved." "\0"
-            VALUE "OriginalFilename", "reagent_x.exe" "\0"
-            VALUE "ProductName", "reagent_x" "\0"
+            VALUE "OriginalFilename", "ReagentX.exe" "\0"
+            VALUE "ProductName", "ReagentX" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END
