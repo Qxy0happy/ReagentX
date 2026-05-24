@@ -15,6 +15,11 @@
 #   Docker → go-backend:8081
 #   本地   → localhost:8081（默认值）
 
+{
+	# 关闭 80 端口自动重定向（Android Termux 非 root 无法绑定特权端口）
+	auto_https disable_redirects
+}
+
 :8080 {
 	tls internal
 
