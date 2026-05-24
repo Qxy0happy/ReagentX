@@ -24,8 +24,10 @@ jobs:
       - name: Build
         working-directory: backend
         run: |
+          BINARY=ReagentX-server
+          if [ "${{ matrix.goos }}" = "windows" ]; then BINARY=ReagentX-server.exe; fi
           GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} CGO_ENABLED=0 \
-            go build -ldflags="-s -w" -o ReagentX-server .
+            go build -ldflags="-s -w" -o "$BINARY" .
 
       - name: Upload
         uses: actions/upload-artifact@v4
