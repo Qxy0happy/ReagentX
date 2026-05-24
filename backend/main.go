@@ -75,8 +75,11 @@ func main() {
 		// TODO: 语音识别端点 POST /api/v1/voice-recognize
 	}
 
-	addr := ":8080"
-	log.Printf("starting server on %s", addr)
+	addr := os.Getenv("LISTEN_ADDR")
+	if addr == "" {
+		addr = ":8081"
+	}
+	log.Printf("listening on %s", addr)
 	if err := router.Run(addr); err != nil {
 		log.Fatalf("server failed: %v", err)
 	}

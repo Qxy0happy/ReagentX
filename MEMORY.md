@@ -18,3 +18,4 @@
 - `inquiries` 旧表 CHECK constraint 仅允许 `pending/accepted/rejected` 三种状态，v0.1.8 已重建表移除 CHECK（改为 Go 端校验）
 - 已存在的 SPU 新增别名后，历史 Item 的 search_text 不会自动更新（FTS5 rebuild 可修复）
 - SQLite `datetime('now')` 返回 UTC 时间，改为 `datetime('now','localtime')` + Go `time.Now()` 保证本地时间正确
+- **HTTPS**：后端默认监听 `:8081`（HTTP），通过 Caddy（`Caddyfile`）在 `:8080` 提供 HTTPS。开发环境用 `tls internal` 自签名，生产配域名走 Let's Encrypt

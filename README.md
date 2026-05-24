@@ -61,14 +61,19 @@ graph TB
 
 ```bash
 cd backend
+
+# 方式一：仅 Go 后端（HTTP :8081，适合调试）
 go run .
-# 监听 :8080
+
+# 方式二：Go + Caddy（HTTPS :8080，推荐）
+go run . &
+caddy run --config Caddyfile
 ```
 
 ```bash
-# 搜索示例
-curl "http://localhost:8080/api/v1/search?q=EDTA"
-curl "http://localhost:8080/api/v1/search?q=乙二胺四乙酸"
+# 搜索示例（使用 Caddy HTTPS）
+curl -k "https://localhost:8080/api/v1/search?q=EDTA"
+curl -k "https://localhost:8080/api/v1/search?q=乙二胺四乙酸"
 ```
 
 ### 前端

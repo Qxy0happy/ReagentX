@@ -1,0 +1,30 @@
+# ReagentX Caddy 配置
+#
+# 生产环境：
+#   1. 把 example.com 换成实际域名
+#   2. 删除 tls internal 行（Caddy 自动从 Let's Encrypt 申请证书）
+#   3. 确保 80/443 端口可访问
+#   4. caddy run
+#
+# 开发环境（自签名证书）：
+#   1. caddy run
+#   2. 首次会提示信任自签名 CA（按说明操作）
+#   3. 手机安装 Caddy 的根证书 → 见 https://caddyserver.com/docs/automatic-https#local-https
+
+:8080 {
+	tls internal
+
+	reverse_proxy localhost:8081 {
+		# Go backend 监听在 :8081（HTTP）
+	}
+
+	# 静态文件（上传的图片）
+	handle_path /uploads/* {
+		reverse_proxy localhost:8081
+	}
+
+	# 日志
+	log {
+		output file caddy-access.log
+	}
+}

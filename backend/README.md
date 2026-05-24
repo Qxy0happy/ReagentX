@@ -13,11 +13,28 @@ Go API 服务 — 试剂闲鱼搜索平台后端。
 ## 快速开始
 
 ```bash
+# Go 后端（HTTP :8081，建议配合 Caddy 使用）
 go run .
-# 监听 :8080
+# 可选：LISTEN_ADDR=:9090 go run .  自定义端口
 ```
 
 首次启动自动建库 + 建表，无需额外配置。
+
+### Caddy（推荐）
+
+项目自带 `Caddyfile`，自动将 `:8080` 的 HTTPS 请求代理到 Go 后端：
+
+```bash
+# 安装 Caddy https://caddyserver.com/download
+# 终端 1：启动 Go 后端
+go run .
+
+# 终端 2：启动 Caddy
+caddy run --config Caddyfile
+```
+
+- 开发环境：Caddy 使用 `tls internal` 生成自签名证书
+- 生产环境：删除 `tls internal`，填入域名即可自动申请 Let's Encrypt 证书
 
 ## API
 
