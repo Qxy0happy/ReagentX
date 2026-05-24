@@ -1,9 +1,9 @@
 {
-  "version": "v0.1.10",
-  "release_notes": "- 更换 App 图标\n- 角色名统一「课题负责人」/「成员」\n- 余量阈值改为 >67% / 33%~67% / <33%\n- 更新项目文档",
+  "version": "v0.1.11",
+  "release_notes": "- 安卓修复网络连接问题（INTERNET 权限 + cleartext 流量）\n- 网络栈切换到 HTTPS（Caddy 反向代理）\n- 新增 docker-compose 编排 + Dockerfile 多阶段构建\n- 新增 Termux 一键启动脚本\n- 修复 CI 构建失败（flutter build apk --output 不支持）\n- 修复 Caddyfile 环境变量语法错误",
   "downloads": {
-    "android": "https://github.com/Qxy0happy/ReagentX/releases/download/v0.1.10/ReagentX-app-android.apk",
-    "windows": "https://github.com/Qxy0happy/ReagentX/releases/download/v0.1.10/ReagentX-server-windows-amd64.zip",
-    "linux": "https://github.com/Qxy0happy/ReagentX/releases/download/v0.1.10/ReagentX-server-linux-amd64.tar.gz"
+    "android": "https://github.com/Qxy0happy/ReagentX/releases/download/v0.1.11/ReagentX-app-android.apk",
+    "windows": "https://github.com/Qxy0happy/ReagentX/releases/download/v0.1.11/ReagentX-server-windows-amd64.tar.gz",
+    "linux": "https://github.com/Qxy0happy/ReagentX/releases/download/v0.1.11/ReagentX-server-linux-amd64.tar.gz"
   }
 }
