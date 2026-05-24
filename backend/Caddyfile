@@ -10,23 +10,21 @@
 #   1. caddy run
 #   2. 首次会提示信任自签名 CA（按说明操作）
 #   3. 手机安装 Caddy 的根证书 → 见 https://caddyserver.com/docs/automatic-https#local-https
-
-{
-	# 用 env 变量切换后端地址：docker 中 UPSTREAM_ADDR=go-backend:8081
-	# 本地开发不设则默认 localhost:8081
-	$UPSTREAM_ADDR {env.UPSTREAM_ADDR:localhost:8081}
-}
+#
+# 环境变量 UPSTREAM_ADDR：
+#   Docker → go-backend:8081
+#   本地   → localhost:8081（默认值）
 
 :8080 {
 	tls internal
 
-	reverse_proxy {$UPSTREAM_ADDR}
+	# {env.VAR:default} 是 Caddy 引用环境变量的标准语法
+	reverse_proxy {env.UPSTREAM_ADDR:localhost:8081}
 
 	handle_path /uploads/* {
-		reverse_proxy {$UPSTREAM_ADDR}
+		reverse_proxy {env.UPSTREAM_ADDR:localhost:8081}
 	}
 
-	# 日志输出到 stdout（Termux/docker 通用）
 	log {
 		output stdout
 	}
