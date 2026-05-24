@@ -69,14 +69,13 @@ docker compose up -d
 #### 方式二：本地开发
 
 ```bash
+# Windows：一键启动 Go + Caddy HTTPS
+.\start-backend.ps1
+
+# 或手动：
 cd backend
-
-# 仅 Go 后端（HTTP :8081，适合调试）
-go run .
-
-# Go + Caddy（HTTPS :8080，推荐）
-go run . &
-caddy reverse-proxy --from localhost:8080 --to localhost:8081
+go run . &                    # HTTP :8081
+caddy reverse-proxy --from localhost:8080 --to localhost:8081  # HTTPS :8080
 ```
 
 ```bash

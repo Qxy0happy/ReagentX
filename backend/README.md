@@ -13,7 +13,10 @@ Go API 服务 — 试剂闲鱼搜索平台后端。
 ## 快速开始
 
 ```bash
-# Go 后端（HTTP :8081，建议配合 Caddy 使用）
+# 方式一：一键启动（推荐）
+..\start-backend.ps1
+
+# 方式二：手动启动
 go run .
 # 可选：LISTEN_ADDR=:9090 go run .  自定义端口
 ```
