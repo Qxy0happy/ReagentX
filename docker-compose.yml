@@ -1,0 +1,47 @@
+services:
+  # ---- Go 后端（HTTP :8081） ----
+  go-backend:
+    build:
+      context: ./backend
+    container_name: reagentx-backend
+    restart: unless-stopped
+    volumes:
+      - reagentx-data:/data/uploads
+      - reagentx-db:/data
+    environment:
+      - LISTEN_ADDR=:8081
+      - DB_PATH=/data/reagentx.db
+    networks:
+      - reagentx-net
+
+  # ---- Caddy（HTTPS :8080） ----
+  caddy:
+    image: caddy:2-alpine
+    container_name: reagentx-caddy
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+      # 如果开放 HTTPS 443 端口：
+      # - "443:443"
+      # - "443:443/udp"   # HTTP/3
+    environment:
+      - UPSTREAM_ADDR=go-backend:8081
+    volumes:
+      - ./backend/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+      - reagentx-data:/data/uploads:ro   # 静态文件只读挂载
+    depends_on:
+      - go-backend
+    networks:
+      - reagentx-net
+
+volumes:
+  reagentx-data:
+  reagentx-db:
+  caddy-data:
+  caddy-config:
+
+networks:
+  reagentx-net:
+    driver: bridge

@@ -1,22 +1,18 @@
+# Stage 1: Build
 FROM golang:1.25-alpine AS builder
-
-WORKDIR /build
-COPY backend/go.mod backend/go.sum ./
-RUN go mod download
-
-COPY backend/ ./
-RUN CGO_ENABLED=0 go build -ldflags="-s -w" -o ReagentX-server .
-
-FROM alpine:3.21
-
-RUN apk add --no-cache ca-certificates tzdata
 WORKDIR /app
-COPY --from=builder /build/ReagentX-server .
+COPY go.mod go.sum .
+RUN go mod download
+COPY . .
+RUN CGO_ENABLED=0 go build -ldflags="-s -w" -o reagentx-server .
 
-EXPOSE 8080
-VOLUME ["/app/data", "/app/uploads"]
-
-ENV DB_PATH=/app/data/ReagentX.db
-ENV GIN_MODE=release
-
-CMD ["./ReagentX-server"]
+# Stage 2: Run
+FROM alpine:3.21
+RUN apk add --no-cache ca-certificates
+RUN mkdir -p /data/uploads
+WORKDIR /data
+COPY --from=builder /app/reagentx-server .
+EXPOSE 8081
+ENV LISTEN_ADDR=:8081
+ENV DB_PATH=/data/reagentx.db
+CMD ["./reagentx-server"]

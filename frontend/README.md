@@ -55,4 +55,5 @@ lib/
 - **我的留言**：查看发出的留言及对方回复
 - **个人页**：成员管理、密码修改、物品管理（删除/修改剩余量）、检查更新
 - **编译期后端地址**：`flutter run --dart-define-from-file=config.json`
-  - 默认回退到 `https://localhost:8080`（配合 Caddy HTTPS）
+  - 默认回退到 `https://localhost:8080`（Docker / Caddy HTTPS）
+  - 本地调试可设 `{"BASE_URL":"http://localhost:8081"}` 直连 Go

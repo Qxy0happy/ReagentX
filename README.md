@@ -59,13 +59,22 @@ graph TB
 
 ### 后端
 
+#### 方式一：Docker Compose（推荐）
+
+```bash
+docker compose up -d
+# Go 后端 + Caddy HTTPS → :8080
+```
+
+#### 方式二：本地开发
+
 ```bash
 cd backend
 
-# 方式一：仅 Go 后端（HTTP :8081，适合调试）
+# 仅 Go 后端（HTTP :8081，适合调试）
 go run .
 
-# 方式二：Go + Caddy（HTTPS :8080，推荐）
+# Go + Caddy（HTTPS :8080）
 go run . &
 caddy run --config Caddyfile
 ```
