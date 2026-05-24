@@ -119,4 +119,24 @@ curl -X POST http://localhost:8080/api/v1/register \
 - [ ] 用户为已有 SPU 补充别名
 - [ ] 消息推送 / 通知
 
+## Termux 部署（无 Docker 演示方案）
+
+```bash
+# 安装依赖
+pkg install golang git
+git clone https://github.com/Qxy0happy/ReagentX
+
+# 一键启动（Go + Caddy）
+cd ReagentX
+bash termux-start.sh
+```
+
+脚本会自动安装 Go 和 Caddy，启动 `Go :8081` + `Caddy HTTPS :8080`。同 WiFi 下其他人用 `https://<手机IP>:8080` 即可访问。
+
+手机装 Flutter APK 后设 `config.json`：
+
+```json
+{"BASE_URL": "http://localhost:8081"}
+```
+
 > 详细设计约束请参阅 `AGENT.md`。项目变更记录见 `MEMORY.md`。

@@ -26,7 +26,8 @@
 		reverse_proxy {$UPSTREAM_ADDR}
 	}
 
+	# 日志输出到 stdout（Termux/docker 通用）
 	log {
-		output file /data/caddy-access.log
+		output stdout
 	}
 }
