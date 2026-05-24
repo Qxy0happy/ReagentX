@@ -14,7 +14,7 @@ Go API 服务 — 试剂闲鱼搜索平台后端。
 
 ```bash
 # 方式一：一键启动（推荐）
-..\start-backend.ps1
+.\start-backend.ps1
 
 # 方式二：手动启动
 go run .

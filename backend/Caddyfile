@@ -2,8 +2,8 @@
 #
 # 开发环境（推荐，免配置）：
 #   cd backend
-#   go run . &
-#   caddy reverse-proxy --from localhost:8080 --to localhost:8081
+#   .\start-backend.ps1
+#   # 或手动：go run . & caddy reverse-proxy --from localhost:8080 --to localhost:8081
 #
 # 生产环境（Docker）：
 #   docker compose up -d

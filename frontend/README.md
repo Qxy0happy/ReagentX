@@ -19,7 +19,7 @@ flutter run
 
 ```bash
 # Windows
-..\start-backend.ps1
+.\backend\start-backend.ps1
 
 # 或其他方式
 cd ../backend
