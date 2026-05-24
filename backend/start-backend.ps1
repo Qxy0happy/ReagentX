@@ -2,7 +2,7 @@
 # 用法：.\start-backend.ps1
 
 $ErrorActionPreference = "Stop"
-Push-Location $PSScriptRoot\backend
+Push-Location $PSScriptRoot
 
 # 1. 启动 Go 后端（HTTP :8081）
 Write-Host "[start] Go backend → :8081" -ForegroundColor Cyan
