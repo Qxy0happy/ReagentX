@@ -514,12 +514,14 @@ class _ProfilePageState extends State<_ProfilePage> {
 
   Widget _buildLoginForm(AuthProvider auth) {
     return Scaffold(
-      body: SingleChildScrollView(
-        padding: EdgeInsets.only(
-          left: 24, right: 24,
-          top: MediaQuery.of(context).padding.top + 48,
-        ),
-        child: Column(
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            padding: EdgeInsets.only(
+              left: 24, right: 24,
+              top: MediaQuery.of(context).padding.top + 48,
+            ),
+            child: Column(
           children: [
             Icon(Icons.science, size: 64, color: Theme.of(context).colorScheme.primary),
             const SizedBox(height: 8),
@@ -649,6 +651,18 @@ class _ProfilePageState extends State<_ProfilePage> {
             const SizedBox(height: 16),
           ],
         ),
+      ),
+          // 齿轮图标 → 设置
+          Positioned(
+            top: MediaQuery.of(context).padding.top + 8,
+            right: 8,
+            child: IconButton(
+              icon: const Icon(Icons.settings_outlined),
+              tooltip: '设置',
+              onPressed: _showSettingsSheet,
+            ),
+          ),
+        ],
       ),
     );
   }
