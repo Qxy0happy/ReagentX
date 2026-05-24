@@ -4,6 +4,11 @@
 $ErrorActionPreference = "Stop"
 Push-Location $PSScriptRoot
 
+# 0. 清理残留进程
+Get-Process -Name "caddy" -ErrorAction SilentlyContinue | Stop-Process -Force
+Start-Sleep -Seconds 1
+Remove-Item "$env:APPDATA\Caddy\autosave.json" -ErrorAction SilentlyContinue
+
 # 1. 启动 Go 后端（HTTP :8081）
 Write-Host "[start] Go backend → :8081" -ForegroundColor Cyan
 $goJob = Start-Process -NoNewWindow -PassThru -FilePath "go" -ArgumentList "run ."
