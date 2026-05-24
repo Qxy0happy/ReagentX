@@ -15,11 +15,16 @@ Flutter 移动端 — Go 后端配套客户端。
 flutter run
 ```
 
-确保后端已在 `localhost:8080` 运行：
+确保后端已在 `localhost:8080`（HTTPS）运行：
 
 ```bash
+# Windows
+..\start-backend.ps1
+
+# 或其他方式
 cd ../backend
 go run .
+# 另一终端：caddy reverse-proxy --from localhost:8080 --to localhost:8081
 ```
 
 ## 项目结构
