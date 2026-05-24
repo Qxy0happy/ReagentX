@@ -74,15 +74,15 @@ cd backend
 # 仅 Go 后端（HTTP :8081，适合调试）
 go run .
 
-# Go + Caddy（HTTPS :8080）
+# Go + Caddy（HTTPS :8080，推荐）
 go run . &
-caddy run --config Caddyfile
+caddy reverse-proxy --from localhost:8080 --to localhost:8081
 ```
 
 ```bash
 # 搜索示例（使用 Caddy HTTPS）
 curl -k "https://localhost:8080/api/v1/search?q=EDTA"
-curl -k "https://localhost:8080/api/v1/search?q=乙二胺四乙酸"
+curl "https://localhost:8080/api/v1/search?q=乙二胺四乙酸"
 ```
 
 ### 前端

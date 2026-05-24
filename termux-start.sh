@@ -24,8 +24,7 @@ if ! command -v caddy &>/dev/null; then
 fi
 
 echo "[start] Caddy → https://localhost:8080"
-export UPSTREAM_ADDR=localhost:8081
-~/go/bin/caddy run --config Caddyfile &
+~/go/bin/caddy reverse-proxy --from localhost:8080 --to localhost:8081 &
 CADDY_PID=$!
 
 echo ""

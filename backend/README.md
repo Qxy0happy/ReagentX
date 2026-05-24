@@ -22,19 +22,19 @@ go run .
 
 ### Caddy（推荐）
 
-项目自带 `Caddyfile`，自动将 `:8080` 的 HTTPS 请求代理到 Go 后端：
+一行命令启动 HTTPS 反向代理（自动生成自签名证书）：
 
 ```bash
 # 安装 Caddy https://caddyserver.com/download
 # 终端 1：启动 Go 后端
 go run .
 
-# 终端 2：启动 Caddy
-caddy run --config Caddyfile
+# 终端 2：启动 Caddy 反向代理
+caddy reverse-proxy --from localhost:8080 --to localhost:8081
 ```
 
-- 开发环境：Caddy 使用 `tls internal` 生成自签名证书
-- 生产环境：删除 `tls internal`，填入域名即可自动申请 Let's Encrypt 证书
+- 开发环境：Caddy 自动管理自签名证书
+- Docker：`docker compose up -d` 使用 Caddyfile 配置
 
 ## API
 
