@@ -13,7 +13,7 @@ import (
 )
 
 func main() {
-	// 数据库路径，默认 reagent-x.db
+	// 数据库路径，默认 reagentx.db
 	dbPath := os.Getenv("DB_PATH")
 	if dbPath == "" {
 		dbPath = "reagentx.db"
