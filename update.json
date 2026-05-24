@@ -1,7 +1,7 @@
 {
-  "version": "v0.1.13",
-  "release_notes": "- 「我的」页面增加「设置」入口（齿轮图标），可运行时修改服务器地址\n- 服务器地址支持 IP 和域名，带 URL 格式校验\n- 设置改为 BottomSheet，关于信息合并到设置中\n- 修复 auth_provider 编译错误\n- Caddyfile 关闭 80 端口自动重定向（Termux 兼容）",
+  "version": "v0.1.14",
+  "release_notes": "- 登录页增加设置齿轮图标（登录前可配置服务器地址）\n- 新增 Windows start-backend.ps1 一键启动脚本\n- Caddy 改用 reverse-proxy 子命令（修复 Windows SChannel SSL 兼容问题）\n- 清理旧 reagent-x.db 文件和引用",
   "downloads": {
-    "android": "https://github.com/Qxy0happy/ReagentX/releases/download/v0.1.13/ReagentX-app-android.apk"
+    "android": "https://github.com/Qxy0happy/ReagentX/releases/download/v0.1.14/ReagentX-app-android.apk"
   }
 }

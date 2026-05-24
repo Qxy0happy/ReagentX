@@ -70,7 +70,7 @@ docker compose up -d
 
 ```bash
 # Windows：一键启动 Go + Caddy HTTPS
-.\start-backend.ps1
+.\backend\start-backend.ps1
 
 # 或手动：
 cd backend
