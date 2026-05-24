@@ -121,6 +121,9 @@ class _ProfilePageState extends State<_ProfilePage> {
   bool _showArchived = false;
   bool _showMyArchived = false;
 
+  // URL 校验
+  String? _urlError;
+
   // 登录表单状态
   String _loginMode = 'login';
   final _groupCtrl = TextEditingController();
@@ -925,13 +928,17 @@ class _ProfilePageState extends State<_ProfilePage> {
         ),
         content: TextField(
           controller: urlCtrl,
-          decoration: const InputDecoration(
+          decoration: InputDecoration(
             labelText: 'API 地址',
             hintText: 'https://192.168.x.x:8080',
-            border: OutlineInputBorder(),
-            prefixIcon: Icon(Icons.link),
+            border: const OutlineInputBorder(),
+            prefixIcon: const Icon(Icons.link),
+            errorText: _urlError,
           ),
           style: const TextStyle(fontSize: 14),
+          onChanged: (_) {
+            if (_urlError != null) setState(() => _urlError = null);
+          },
         ),
         actions: [
           TextButton(
@@ -941,7 +948,11 @@ class _ProfilePageState extends State<_ProfilePage> {
           FilledButton(
             onPressed: () async {
               final url = urlCtrl.text.trim();
-              if (url.isEmpty) return;
+              final err = _validateUrl(url);
+              if (err != null) {
+                setState(() => _urlError = err);
+                return;
+              }
               await ApiConfig.save(url);
               if (!mounted) return;
               Navigator.pop(ctx);
@@ -955,6 +966,18 @@ class _ProfilePageState extends State<_ProfilePage> {
         ],
       ),
     );
+  }
+
+  String? _validateUrl(String url) {
+    if (url.isEmpty) return '地址不能为空';
+    final uri = Uri.tryParse(url);
+    if (uri == null || !uri.hasScheme || !uri.hasAuthority) {
+      return '格式不正确，示例：https://192.168.1.100:8080';
+    }
+    if (uri.scheme != 'http' && uri.scheme != 'https') {
+      return '协议必须是 http 或 https';
+    }
+    return null;
   }
 
   void _showUpdateDialog(UpdateInfo upd) {
