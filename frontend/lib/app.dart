@@ -981,6 +981,19 @@ class _ProfilePageState extends State<_ProfilePage> {
                 setState(() => _urlError = err);
                 return;
               }
+              // 连接测试
+              try {
+                final testResp = await http
+                    .get(Uri.parse('$url/api/v1/search?q=test'))
+                    .timeout(const Duration(seconds: 5));
+                if (testResp.statusCode != 200) {
+                  setState(() => _urlError = '服务器返回状态码 ${testResp.statusCode}');
+                  return;
+                }
+              } on Exception catch (e) {
+                setState(() => _urlError = '无法连接: ${e.toString().replaceAll('Exception: ', '')}');
+                return;
+              }
               await ApiConfig.save(url);
               if (!mounted) return;
               Navigator.pop(ctx);
