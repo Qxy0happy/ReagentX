@@ -118,6 +118,7 @@ curl -X POST http://localhost:8080/api/v1/register \
 - [ ] 语音识别辅助输入（Flutter 端）
 - [ ] 用户为已有 SPU 补充别名
 - [ ] 消息推送 / 通知
+- [ ] Flutter Web 支持（需条件导入 camera + 后端 CORS）
 
 ## Termux 部署（无 Docker 演示方案）
 
