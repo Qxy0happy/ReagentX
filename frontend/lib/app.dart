@@ -837,8 +837,6 @@ class _ProfilePageState extends State<_ProfilePage> {
           const SizedBox(height: 16),
           _buildSettingsSection(),
           const SizedBox(height: 16),
-          _buildUpdateSection(),
-          const SizedBox(height: 16),
           _buildMyInquiriesSection(),
           const SizedBox(height: 16),
           _buildInquiriesSection(),
@@ -854,61 +852,57 @@ class _ProfilePageState extends State<_ProfilePage> {
         Text('设置', style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 8),
         Card(
-          child: ListTile(
-            leading: Icon(Icons.dns_outlined, color: Theme.of(context).colorScheme.primary),
-            title: const Text('服务器地址'),
-            subtitle: Text(ApiConfig.baseUrl, style: const TextStyle(fontSize: 12)),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: _showServerSettings,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildUpdateSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('关于', style: Theme.of(context).textTheme.titleMedium),
-        const SizedBox(height: 8),
-        Card(
-          child: ListTile(
-            leading: Icon(Icons.info_outline, color: Theme.of(context).colorScheme.primary),
-            title: const Text('ReagentX'),
-            subtitle: const Text('课题组试剂管理平台'),
-            trailing: Text('v1.0.0', style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey)),
+          child: Column(
+            children: [
+              ListTile(
+                leading: Icon(Icons.dns_outlined, color: Theme.of(context).colorScheme.primary),
+                title: const Text('服务器地址'),
+                subtitle: Text(ApiConfig.baseUrl, style: const TextStyle(fontSize: 12)),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: _showServerSettings,
+              ),
+              const Divider(height: 1, indent: 16, endIndent: 16),
+              ListTile(
+                leading: Icon(Icons.info_outline, color: Theme.of(context).colorScheme.primary),
+                title: const Text('ReagentX'),
+                subtitle: const Text('课题组试剂管理平台'),
+                trailing: Text('v1.0.0', style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey)),
+              ),
+            ],
           ),
         ),
         const SizedBox(height: 8),
-        OutlinedButton.icon(
-          onPressed: () async {
-            final up = context.read<UpdateProvider>();
-            final scaffold = ScaffoldMessenger.of(context);
-            if (up.checking) return;
+        SizedBox(
+          width: double.infinity,
+          child: OutlinedButton.icon(
+            onPressed: () async {
+              final up = context.read<UpdateProvider>();
+              final scaffold = ScaffoldMessenger.of(context);
+              if (up.checking) return;
 
-            scaffold.showSnackBar(
-              const SnackBar(content: Text('正在检查更新…'), duration: Duration(seconds: 1)),
-            );
-
-            final hasUpdate = await up.checkForUpdate();
-
-            if (!mounted) return;
-
-            if (hasUpdate && up.latest != null) {
-              _showUpdateDialog(up.latest!);
-            } else if (up.error != null) {
               scaffold.showSnackBar(
-                SnackBar(content: Text('检查失败: ${up.error}')),
+                const SnackBar(content: Text('正在检查更新…'), duration: Duration(seconds: 1)),
               );
-            } else {
-              scaffold.showSnackBar(
-                const SnackBar(content: Text('已是最新版本')),
-              );
-            }
-          },
-          icon: const Icon(Icons.system_update_outlined, size: 18),
-          label: const Text('检查更新'),
+
+              final hasUpdate = await up.checkForUpdate();
+
+              if (!mounted) return;
+
+              if (hasUpdate && up.latest != null) {
+                _showUpdateDialog(up.latest!);
+              } else if (up.error != null) {
+                scaffold.showSnackBar(
+                  SnackBar(content: Text('检查失败: ${up.error}')),
+                );
+              } else {
+                scaffold.showSnackBar(
+                  const SnackBar(content: Text('已是最新版本')),
+                );
+              }
+            },
+            icon: const Icon(Icons.system_update_outlined, size: 18),
+            label: const Text('检查更新'),
+          ),
         ),
       ],
     );
