@@ -72,10 +72,10 @@ class AuthProvider extends ChangeNotifier {
     String memberPassword = '',
     String labLocation = '',
     List<String> members = const [],
-    String serverUrl = ApiConfig.baseUrl,
+    String serverUrl = '',
   }) async {
     final resp = await http.post(
-      Uri.parse('$serverUrl/api/v1/register'),
+      Uri.parse('${serverUrl.isNotEmpty ? serverUrl : ApiConfig.baseUrl}/api/v1/register'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
         'teacher_name': teacherName,
@@ -97,10 +97,10 @@ class AuthProvider extends ChangeNotifier {
     required String teacherName,
     required String userName,
     required String password,
-    String serverUrl = ApiConfig.baseUrl,
+    String serverUrl = '',
   }) async {
     final resp = await http.post(
-      Uri.parse('$serverUrl/api/v1/login'),
+      Uri.parse('${serverUrl.isNotEmpty ? serverUrl : ApiConfig.baseUrl}/api/v1/login'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
         'teacher_name': teacherName,
