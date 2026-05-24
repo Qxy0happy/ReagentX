@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'config/api_config.dart';
 import 'app.dart';
 import 'providers/auth_provider.dart';
 import 'providers/camera_provider.dart';
@@ -8,6 +9,9 @@ import 'providers/update_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // 加载用户配置（服务地址等）
+  await ApiConfig.load();
 
   // 启动时加载持久化登录态
   final auth = AuthProvider();

@@ -832,6 +832,8 @@ class _ProfilePageState extends State<_ProfilePage> {
                 )),
 
           const SizedBox(height: 16),
+          _buildSettingsSection(),
+          const SizedBox(height: 16),
           _buildUpdateSection(),
           const SizedBox(height: 16),
           _buildMyInquiriesSection(),
@@ -839,6 +841,25 @@ class _ProfilePageState extends State<_ProfilePage> {
           _buildInquiriesSection(),
         ],
       ),
+    );
+  }
+
+  Widget _buildSettingsSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('设置', style: Theme.of(context).textTheme.titleMedium),
+        const SizedBox(height: 8),
+        Card(
+          child: ListTile(
+            leading: Icon(Icons.dns_outlined, color: Theme.of(context).colorScheme.primary),
+            title: const Text('服务器地址'),
+            subtitle: Text(ApiConfig.baseUrl, style: const TextStyle(fontSize: 12)),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: _showServerSettings,
+          ),
+        ),
+      ],
     );
   }
 
@@ -887,6 +908,52 @@ class _ProfilePageState extends State<_ProfilePage> {
           label: const Text('检查更新'),
         ),
       ],
+    );
+  }
+
+  void _showServerSettings() {
+    final urlCtrl = TextEditingController(text: ApiConfig.baseUrl);
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Row(
+          children: [
+            Icon(Icons.dns_outlined, size: 20),
+            SizedBox(width: 8),
+            Text('服务器地址'),
+          ],
+        ),
+        content: TextField(
+          controller: urlCtrl,
+          decoration: const InputDecoration(
+            labelText: 'API 地址',
+            hintText: 'https://192.168.x.x:8080',
+            border: OutlineInputBorder(),
+            prefixIcon: Icon(Icons.link),
+          ),
+          style: const TextStyle(fontSize: 14),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('取消'),
+          ),
+          FilledButton(
+            onPressed: () async {
+              final url = urlCtrl.text.trim();
+              if (url.isEmpty) return;
+              await ApiConfig.save(url);
+              if (!mounted) return;
+              Navigator.pop(ctx);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('服务器地址已更新')),
+              );
+              setState(() {});
+            },
+            child: const Text('保存'),
+          ),
+        ],
+      ),
     );
   }
 
