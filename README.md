@@ -75,7 +75,7 @@ docker compose up -d
 # 或手动：
 cd backend
 go run . &                    # HTTP :8081
-caddy reverse-proxy --from localhost:8080 --to localhost:8081  # HTTPS :8080
+caddy reverse-proxy --from localhost:8080 --to localhost:8081 --disable-redirects  # HTTPS :8080
 ```
 
 ```bash

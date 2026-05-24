@@ -10,7 +10,7 @@ $goJob = Start-Process -NoNewWindow -PassThru -FilePath "go" -ArgumentList "run 
 
 # 2. 启动 Caddy 反向代理（HTTPS :8080）
 Write-Host "[start] Caddy → https://localhost:8080" -ForegroundColor Cyan
-$caddyJob = Start-Process -NoNewWindow -PassThru -FilePath "caddy" -ArgumentList "reverse-proxy --from localhost:8080 --to localhost:8081"
+$caddyJob = Start-Process -NoNewWindow -PassThru -FilePath "caddy" -ArgumentList "reverse-proxy --from localhost:8080 --to localhost:8081 --disable-redirects"
 
 Pop-Location
 

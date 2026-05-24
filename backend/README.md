@@ -33,7 +33,7 @@ go run .
 go run .
 
 # 终端 2：启动 Caddy 反向代理
-caddy reverse-proxy --from localhost:8080 --to localhost:8081
+caddy reverse-proxy --from localhost:8080 --to localhost:8081 --disable-redirects
 ```
 
 - 开发环境：Caddy 自动管理自签名证书

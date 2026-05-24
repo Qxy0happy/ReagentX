@@ -24,7 +24,7 @@ flutter run
 # 或其他方式
 cd ../backend
 go run .
-# 另一终端：caddy reverse-proxy --from localhost:8080 --to localhost:8081
+# 另一终端：caddy reverse-proxy --from localhost:8080 --to localhost:8081 --disable-redirects
 ```
 
 ## 项目结构
