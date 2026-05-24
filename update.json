@@ -1,7 +1,7 @@
 {
-  "version": "v0.1.12",
-  "release_notes": "- 安卓修复网络连接问题（INTERNET 权限 + cleartext 流量）\n- 网络栈切换到 HTTPS（Caddy 反向代理）\n- 新增 docker-compose 编排 + Dockerfile 多阶段构建\n- 新增 Termux 一键启动脚本\n- 修复 CI 构建失败（flutter build apk --output 不支持）\n- 修复 Caddyfile 环境变量语法错误\n- 修复 CI Windows 交叉编译缺失 .exe 后缀",
+  "version": "v0.1.13",
+  "release_notes": "- 「我的」页面增加「设置」入口（齿轮图标），可运行时修改服务器地址\n- 服务器地址支持 IP 和域名，带 URL 格式校验\n- 设置改为 BottomSheet，关于信息合并到设置中\n- 修复 auth_provider 编译错误\n- Caddyfile 关闭 80 端口自动重定向（Termux 兼容）",
   "downloads": {
-    "android": "https://github.com/Qxy0happy/ReagentX/releases/download/v0.1.12/ReagentX-app-android.apk"
+    "android": "https://github.com/Qxy0happy/ReagentX/releases/download/v0.1.13/ReagentX-app-android.apk"
   }
 }
